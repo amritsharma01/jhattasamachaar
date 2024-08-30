@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "18607328866",
+    "project_id": "jhattasamachaar",
+    "storage_bucket": "jhattasamachaar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:18607328866:android:9c0a0d70cc55068d3c8b3b",
+        "android_client_info": {
+          "package_name": "com.example.jhattasamachar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFdcNg_Ols8G8k2fiVzFSOBFU78QhbnmE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
