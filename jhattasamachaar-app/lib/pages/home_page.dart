@@ -42,15 +42,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
       body: page[i],
       bottomNavigationBar: CurvedNavigationBar(
-          height: 55,
+          height: 60,
           onTap: func,
           animationCurve: Curves.linearToEaseOut,
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.grey.shade100,
           color: Colors.grey.shade300,
-          buttonBackgroundColor: Colors.green.shade100,
+          buttonBackgroundColor: Colors.green.shade200,
           items: const [
             Icon(
               Icons.home,

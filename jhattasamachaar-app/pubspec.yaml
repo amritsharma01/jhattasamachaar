@@ -42,6 +42,7 @@ dependencies:
   lottie: ^3.1.2
   http: ^1.2.2
   curved_navigation_bar: ^1.0.6
+  launch_review: ^3.0.1
 
 dev_dependencies:
   flutter_test:

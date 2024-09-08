@@ -14,7 +14,7 @@ class NewsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
       child: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
@@ -25,10 +25,10 @@ class NewsTile extends StatelessWidget {
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(15),
                 child: Image.network(
                   imageurl,
-                  height: 80,
+                  height: 90,
                 ),
               ),
               const SizedBox(width: 10),
