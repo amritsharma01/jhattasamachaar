@@ -43,6 +43,7 @@ dependencies:
   http: ^1.2.2
   curved_navigation_bar: ^1.0.6
   launch_review: ^3.0.1
+  flutter_tts: ^4.0.2
 
 dev_dependencies:
   flutter_test:
