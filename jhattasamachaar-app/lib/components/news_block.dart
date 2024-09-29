@@ -21,14 +21,14 @@ class NewsTile extends StatelessWidget {
             color: Colors.grey.shade300,
             borderRadius: BorderRadius.circular(25)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           child: Row(
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: Image.network(
                   imageurl,
-                  height: 90,
+                  height: 80,
                 ),
               ),
               const SizedBox(width: 10),

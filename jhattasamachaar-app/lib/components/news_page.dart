@@ -1,8 +1,11 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:jhattasamachaar/components/news_api.dart'; // Update the import according to your project structure
-import 'package:jhattasamachaar/components/news_block.dart'; // Update the import according to your project structure
+import 'package:jhattasamachaar/components/news_api.dart';
+import 'package:jhattasamachaar/components/news_block.dart';
 import 'package:lottie/lottie.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -13,40 +16,199 @@ class NewsPage extends StatefulWidget {
 
 class _NewsPageState extends State<NewsPage> {
   final NewsService newsService = NewsService();
-  final FlutterTts flutterTts = FlutterTts();
-  final List<Map<String, String>> _newsList = [];
+  final Dio dio = Dio();
+  final AudioPlayer audioPlayer = AudioPlayer();
 
-  Future<void> _readTitle(String title) async {
-    await flutterTts
-        .setVoice({"name": "en-us-x-sfg#male_1-local", "locale": "en-US"});
-    await flutterTts.speak(title);
+  String? mp3FilePath; // Local path to store downloaded MP3
+  bool isDownloading = false;
+  double downloadProgress = 0.0;
+  bool isPlaying = false;
+  Duration currentPosition = Duration.zero;
+  Duration totalDuration = Duration.zero;
+  final String token =
+      '19af408ae1c7c7be840108e7344183cd5ba30b31e6f871a5ff2d0dfc062f063c'; // Replace with your actual token
+
+  List<dynamic>? newsData; // Store fetched news data
+
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    super.dispose();
   }
 
-  Future<void> _readDescription(String description) async {
-    await flutterTts
-        .setVoice({"name": "en-us-x-tpd#male_2-local", "locale": "en-US"});
-    await flutterTts.speak(description);
+  @override
+  void initState() {
+    super.initState();
+    fetchNews(); // Fetch news on initialization
+    setupAudioPlayerListeners(); // Set up audio player listeners
   }
 
-  Future<void> _readNewsArticle(Map<String, String> article) async {
-    String title = article['title'] ?? 'No Title';
-    String description = article['description'] ?? 'No Description';
+  void setupAudioPlayerListeners() {
+    audioPlayer.onDurationChanged.listen((Duration duration) {
+      setState(() {
+        totalDuration = duration;
+      });
+    });
 
-    await _readTitle(title);
-    await flutterTts.awaitSpeakCompletion(true); // Wait for title to be spoken
-    await Future.delayed(const Duration(
-        seconds: 1)); // Optional delay between title and description
-    await _readDescription(description);
-    await flutterTts
-        .awaitSpeakCompletion(true); // Wait for description to be spoken
+    audioPlayer.onPositionChanged.listen((Duration position) {
+      setState(() {
+        currentPosition = position;
+      });
+    });
   }
 
-  Future<void> _readAllNews() async {
-    for (var news in _newsList) {
-      await _readNewsArticle(news);
-      await Future.delayed(
-          const Duration(seconds: 1)); // Optional delay between articles
+  Future<void> fetchNews() async {
+    final fetchedNews = await newsService.fetchNews();
+    setState(() {
+      newsData = fetchedNews; // Store fetched news
+    });
+  }
+
+  Future<void> downloadAndStoreMP3(String url) async {
+    try {
+      setState(() {
+        isDownloading = true;
+      });
+
+      Directory appDir = await getApplicationDocumentsDirectory();
+      mp3FilePath = '${appDir.path}/news_audio.mp3';
+
+      // Check if the audio file already exists
+      if (!File(mp3FilePath!).existsSync()) {
+        await dio.download(
+          url,
+          mp3FilePath!,
+          options: Options(
+            headers: {
+              'Authorization': 'Token $token',
+            },
+          ),
+          onReceiveProgress: (received, total) {
+            if (total != -1) {
+              setState(() {
+                downloadProgress = received / total;
+              });
+            }
+          },
+        );
+      }
+
+      setState(() {
+        isDownloading = false;
+        downloadProgress = 1.0;
+      });
+    } catch (e) {
+      setState(() {
+        isDownloading = false;
+      });
+      print('Error downloading MP3: $e');
     }
+  }
+
+  Future<void> playAudio() async {
+    if (mp3FilePath != null) {
+      await audioPlayer.play(DeviceFileSource(mp3FilePath!));
+      setState(() {
+        isPlaying = true;
+      });
+    } else {
+      print('No MP3 file available to play.');
+    }
+  }
+
+  Future<void> pauseAudio() async {
+    await audioPlayer.pause();
+    setState(() {
+      isPlaying = false;
+    });
+  }
+
+  Future<void> resumeAudio() async {
+    await audioPlayer.resume();
+    setState(() {
+      isPlaying = true;
+    });
+  }
+
+  void showAudioPlayerDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Now Playing",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 15),
+                Slider(
+                  value: currentPosition.inSeconds.toDouble(),
+                  min: 0,
+                  max: totalDuration.inSeconds.toDouble() > 0
+                      ? totalDuration.inSeconds.toDouble()
+                      : 1,
+                  onChanged: (value) async {
+                    await audioPlayer.seek(Duration(seconds: value.toInt()));
+                    setState(() {
+                      currentPosition = Duration(seconds: value.toInt());
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(formatDuration(currentPosition)),
+                    Text(formatDuration(totalDuration)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                IconButton(
+                  iconSize: 40,
+                  icon: Icon(
+                    isPlaying
+                        ? Icons.pause_circle_filled
+                        : Icons.play_circle_filled,
+                    color: Colors.green.shade400,
+                  ),
+                  onPressed: () {
+                    if (isPlaying) {
+                      pauseAudio();
+                    } else {
+                      resumeAudio();
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: () {
+                    audioPlayer.stop();
+                    Navigator.of(context).pop(); // Close the dialog
+                    setState(() {
+                      isPlaying = false; // Reset playing state
+                    });
+                  },
+                  child: const Text("Close"),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
 
   @override
@@ -54,14 +216,22 @@ class _NewsPageState extends State<NewsPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.green.shade200,
-        onPressed: () {
-          // Read all stored news
-          _readAllNews();
+        onPressed: () async {
+          const String mp3Url =
+              'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/news/mp3/';
+          await downloadAndStoreMP3(mp3Url);
+          await playAudio();
+          showAudioPlayerDialog();
         },
-        label: const Text(
-          "Read Aloud",
-          style: TextStyle(fontSize: 17),
-        ),
+        label: isDownloading
+            ? CircularProgressIndicator(
+                value: downloadProgress,
+                backgroundColor: Colors.white,
+              )
+            : const Text(
+                "Read Aloud",
+                style: TextStyle(fontSize: 17),
+              ),
         icon: const Icon(
           Icons.speaker_phone,
           size: 30,
@@ -73,70 +243,35 @@ class _NewsPageState extends State<NewsPage> {
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.newspaper,
-              size: 30,
-            ),
-            SizedBox(
-              width: 7,
-            ),
-            Text(
-              "Latest News Today!",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-            ),
+            Icon(Icons.newspaper, size: 30),
+            SizedBox(width: 7),
+            Text("Latest News Today!",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
           ],
         ),
       ),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 5,
-          ),
-          Expanded(
-            child: FutureBuilder<List<dynamic>>(
-              future: newsService.fetchNews(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                      child: SizedBox(
-                    height: 100,
-                    child: Lottie.asset("lib/assets/animations/loading.json"),
-                  ));
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No news available.'));
-                } else {
-                  _newsList.clear();
-                  for (var article in snapshot.data!) {
-                    String title = article['title'] ?? 'No Title';
-                    String description =
-                        article['description'] ?? 'No Description';
-                    _newsList.add({'title': title, 'description': description});
-                  }
+      body: newsData == null
+          ? Center(
+              child: SizedBox(
+                height: 100,
+                child: Lottie.asset("lib/assets/animations/loading.json"),
+              ),
+            )
+          : ListView.builder(
+              itemCount: newsData!.length,
+              itemBuilder: (context, index) {
+                var article = newsData![index];
+                String title = article['title'] ?? 'No Title';
+                String imgurl = article['og_image_url'] ?? "";
+                String description = article['summary'] ?? 'No Description';
 
-                  return ListView.builder(
-                    itemCount: 4,
-                    itemBuilder: (context, index) {
-                      var article = _newsList[index];
-                      String title = article['title'] ?? 'No Title';
-                      String description =
-                          article['description'] ?? 'No Description';
-
-                      return NewsTile(
-                        title: title,
-                        description: description,
-                        imageurl:
-                            "https://play-lh.googleusercontent.com/_ahCmEdTn8h5omlAg0jg9Y15KArlptm4qcbnyWSzGU-jM4mR1LeArqbMM7DzgZjNywO2",
-                      );
-                    },
-                  );
-                }
+                return NewsTile(
+                  title: title,
+                  description: description,
+                  imageurl: imgurl,
+                );
               },
             ),
-          ),
-        ],
-      ),
     );
   }
 }
