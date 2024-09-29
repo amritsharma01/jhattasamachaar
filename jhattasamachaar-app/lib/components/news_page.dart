@@ -1,8 +1,10 @@
+// news_page.dart
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:jhattasamachaar/components/news_api.dart';
 import 'package:jhattasamachaar/components/news_block.dart';
+import 'package:jhattasamachaar/components/audio_player_dialog.dart'; // Import the dialog component
 import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -22,11 +24,9 @@ class _NewsPageState extends State<NewsPage> {
   String? mp3FilePath; // Local path to store downloaded MP3
   bool isDownloading = false;
   double downloadProgress = 0.0;
-  bool isPlaying = false;
-  Duration currentPosition = Duration.zero;
-  Duration totalDuration = Duration.zero;
+
   final String token =
-      '19af408ae1c7c7be840108e7344183cd5ba30b31e6f871a5ff2d0dfc062f063c'; // Replace with your actual token
+      '19af408ae1c7c7be840108e7344183cd5ba30b31e6f871a5ff2d0dfc062f063c';
 
   List<dynamic>? newsData; // Store fetched news data
 
@@ -40,21 +40,6 @@ class _NewsPageState extends State<NewsPage> {
   void initState() {
     super.initState();
     fetchNews(); // Fetch news on initialization
-    setupAudioPlayerListeners(); // Set up audio player listeners
-  }
-
-  void setupAudioPlayerListeners() {
-    audioPlayer.onDurationChanged.listen((Duration duration) {
-      setState(() {
-        totalDuration = duration;
-      });
-    });
-
-    audioPlayer.onPositionChanged.listen((Duration position) {
-      setState(() {
-        currentPosition = position;
-      });
-    });
   }
 
   Future<void> fetchNews() async {
@@ -101,114 +86,31 @@ class _NewsPageState extends State<NewsPage> {
       setState(() {
         isDownloading = false;
       });
-      print('Error downloading MP3: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Failed to download audio. Please try again.')),
+      );
     }
   }
 
-  Future<void> playAudio() async {
-    if (mp3FilePath != null) {
-      await audioPlayer.play(DeviceFileSource(mp3FilePath!));
-      setState(() {
-        isPlaying = true;
-      });
-    } else {
-      print('No MP3 file available to play.');
-    }
-  }
-
-  Future<void> pauseAudio() async {
-    await audioPlayer.pause();
-    setState(() {
-      isPlaying = false;
-    });
-  }
-
-  Future<void> resumeAudio() async {
-    await audioPlayer.resume();
-    setState(() {
-      isPlaying = true;
-    });
-  }
-
-  void showAudioPlayerDialog() {
+  void showPlayerDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Now Playing",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 15),
-                Slider(
-                  value: currentPosition.inSeconds.toDouble(),
-                  min: 0,
-                  max: totalDuration.inSeconds.toDouble() > 0
-                      ? totalDuration.inSeconds.toDouble()
-                      : 1,
-                  onChanged: (value) async {
-                    await audioPlayer.seek(Duration(seconds: value.toInt()));
-                    setState(() {
-                      currentPosition = Duration(seconds: value.toInt());
-                    });
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(formatDuration(currentPosition)),
-                    Text(formatDuration(totalDuration)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                IconButton(
-                  iconSize: 40,
-                  icon: Icon(
-                    isPlaying
-                        ? Icons.pause_circle_filled
-                        : Icons.play_circle_filled,
-                    color: Colors.green.shade400,
-                  ),
-                  onPressed: () {
-                    if (isPlaying) {
-                      pauseAudio();
-                    } else {
-                      resumeAudio();
-                    }
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () {
-                    audioPlayer.stop();
-                    Navigator.of(context).pop(); // Close the dialog
-                    setState(() {
-                      isPlaying = false; // Reset playing state
-                    });
-                  },
-                  child: const Text("Close"),
-                ),
-              ],
-            ),
-          ),
+        return AudioPlayerDialog(
+          audioPlayer: audioPlayer,
+          mp3FilePath: mp3FilePath,
+          resetPlayer: resetPlayer,
         );
       },
     );
   }
 
-  String formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
+  void resetPlayer() {
+    audioPlayer.stop();
+    setState(() {
+      // Reset any state related to the audio player if necessary
+    });
   }
 
   @override
@@ -217,11 +119,16 @@ class _NewsPageState extends State<NewsPage> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.green.shade200,
         onPressed: () async {
-          const String mp3Url =
-              'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/news/mp3/';
-          await downloadAndStoreMP3(mp3Url);
-          await playAudio();
-          showAudioPlayerDialog();
+          if (mp3FilePath == null || !File(mp3FilePath!).existsSync()) {
+            const String mp3Url =
+                'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/news/mp3/';
+            await downloadAndStoreMP3(mp3Url);
+            if (!isDownloading) {
+              showPlayerDialog();
+            }
+          } else {
+            showPlayerDialog(); // If already downloaded, directly open the player
+          }
         },
         label: isDownloading
             ? CircularProgressIndicator(
