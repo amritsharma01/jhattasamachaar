@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:jhattasamachaar/components/settings_tile.dart';
+import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:lottie/lottie.dart';
 
@@ -20,6 +21,7 @@ class _AccountPageState extends State<AccountPage> {
   String name = 'User';
   String email = "user@user.com";
   String photoUrl = "lib/assets/images/user.png";
+  final String api = Globals.link;
 
   @override
   void initState() {
@@ -110,19 +112,18 @@ class _AccountPageState extends State<AccountPage> {
                     );
                   },
                 );
-                
+
                 // Retrieve the token from secure storage
                 const FlutterSecureStorage secureStorage =
                     FlutterSecureStorage();
                 String? token = await secureStorage.read(key: 'auth_token');
-                  print(token);
+                print(token);
                 // Send a POST request to the backend to log out
                 final response = await http.post(
                   Uri.parse(
-                      'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/auth/logout/'), // Replace with your backend logout URL
+                      '$api/api/auth/logout/'), // Replace with your backend logout URL
                   headers: {
-                    'Authorization':
-                        'Token $token', 
+                    'Authorization': 'Token $token',
                     'Content-Type': 'application/json',
                   },
                 );

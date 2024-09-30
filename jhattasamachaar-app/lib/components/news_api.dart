@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jhattasamachaar/globals/api_link.dart';
 
 class NewsService {
-  final String apiUrl = 'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/news/';
+  final String api = Globals.link; 
+  late final String apiUrl = '$api/api/news/'; 
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   Future<List<dynamic>> fetchNews() async {

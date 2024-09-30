@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:lottie/lottie.dart';
 
 class Login extends StatefulWidget {
@@ -16,6 +17,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  final String api = Globals.link;
 
   Future<UserCredential?> signInWithGoogle() async {
     BuildContext? dialogContext;
@@ -116,8 +118,7 @@ class _LoginState extends State<Login> {
   }
 
   Future<void> sendIdTokenToBackend(String idToken) async {
-    const String backendUrl =
-        'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/auth/google/';
+    String backendUrl = '$api/api/auth/google/';
 
     try {
       final response = await http.post(
