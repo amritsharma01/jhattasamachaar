@@ -1,13 +1,13 @@
-// news_page.dart
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:jhattasamachaar/components/news_api.dart';
 import 'package:jhattasamachaar/components/news_block.dart';
-import 'package:jhattasamachaar/components/audio_player_dialog.dart'; // Import the dialog component
+import 'package:jhattasamachaar/components/audio_player_dialog.dart';
 import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -20,15 +20,18 @@ class _NewsPageState extends State<NewsPage> {
   final NewsService newsService = NewsService();
   final Dio dio = Dio();
   final AudioPlayer audioPlayer = AudioPlayer();
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
-  String? mp3FilePath; // Local path to store downloaded MP3
+  String? mp3FilePath;
   bool isDownloading = false;
   double downloadProgress = 0.0;
+  List<dynamic>? newsData;
 
-  final String token =
-      '19af408ae1c7c7be840108e7344183cd5ba30b31e6f871a5ff2d0dfc062f063c';
+  static const String mp3Url =
+      'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/news/mp3/';
 
-  List<dynamic>? newsData; // Store fetched news data
+  // A flag to indicate if news has been fetched
+  bool newsFetched = false;
 
   @override
   void dispose() {
@@ -39,62 +42,98 @@ class _NewsPageState extends State<NewsPage> {
   @override
   void initState() {
     super.initState();
-    fetchNews(); // Fetch news on initialization
+    // Fetch news only once
+    fetchNews();
   }
 
   Future<void> fetchNews() async {
-    final fetchedNews = await newsService.fetchNews();
-    setState(() {
-      newsData = fetchedNews; // Store fetched news
-    });
+    if (!newsFetched) {
+      // Check if news has already been fetched
+      final fetchedNews = await newsService.fetchNews();
+      setState(() {
+        newsData = fetchedNews;
+        newsFetched = true; // Mark news as fetched
+      });
+    }
   }
 
-  Future<void> downloadAndStoreMP3(String url) async {
-    try {
-      setState(() {
-        isDownloading = true;
-      });
+  Future<String?> getToken() async {
+    return await secureStorage.read(key: 'auth_token');
+  }
 
+  Future<void> downloadMP3(String url) async {
+    try {
       Directory appDir = await getApplicationDocumentsDirectory();
       mp3FilePath = '${appDir.path}/news_audio.mp3';
 
-      // Check if the audio file already exists
-      if (!File(mp3FilePath!).existsSync()) {
-        await dio.download(
-          url,
-          mp3FilePath!,
-          options: Options(
-            headers: {
-              'Authorization': 'Token $token',
-            },
-          ),
-          onReceiveProgress: (received, total) {
-            if (total != -1) {
-              setState(() {
-                downloadProgress = received / total;
-              });
-            }
-          },
-        );
+      String? token = await getToken();
+      if (token == null) {
+        throw Exception('Authentication token not found. Please log in again.');
       }
+
+      await dio.download(
+        url,
+        mp3FilePath!,
+        options: Options(
+          headers: {
+            'Authorization': 'Token $token',
+          },
+        ),
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            setState(() {
+              downloadProgress = received / total;
+            });
+          }
+        },
+      );
 
       setState(() {
         isDownloading = false;
-        downloadProgress = 1.0;
+        downloadProgress = 1.0; // Completed downloading
       });
     } catch (e) {
       setState(() {
         isDownloading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Failed to download audio. Please try again.')),
+        SnackBar(content: Text('Failed to download audio: $e')),
       );
     }
   }
 
+  Future<void> downloadAndShowPlayer() async {
+    setState(() {
+      isDownloading = true; // Start the downloading state
+    });
+
+    // Check if the file already exists
+    if (mp3FilePath == null) {
+      Directory appDir = await getApplicationDocumentsDirectory();
+      mp3FilePath = '${appDir.path}/news_audio.mp3';
+    }
+
+    final fileExists = File(mp3FilePath!).existsSync();
+
+    if (!fileExists) {
+      // If the file does not exist, download it
+      await downloadMP3(mp3Url);
+    } else {
+      // If the file exists, reset the download progress and set the downloading state
+      setState(() {
+        isDownloading = false; // Reset downloading state
+        downloadProgress = 1.0; // Mark as completed since it exists
+      });
+    }
+
+    // Once download is complete or if the file already exists, show the player dialog
+    showPlayerDialog();
+  }
+
+
   void showPlayerDialog() {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return AudioPlayerDialog(
@@ -107,10 +146,12 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   void resetPlayer() {
-    audioPlayer.stop();
-    setState(() {
-      // Reset any state related to the audio player if necessary
-    });
+    if (mp3FilePath != null) {
+      audioPlayer.stop(); // Stop playback
+      setState(() {
+        // You can reset additional states here if needed
+      });
+    }
   }
 
   @override
@@ -118,22 +159,15 @@ class _NewsPageState extends State<NewsPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.green.shade200,
-        onPressed: () async {
-          if (mp3FilePath == null || !File(mp3FilePath!).existsSync()) {
-            const String mp3Url =
-                'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/news/mp3/';
-            await downloadAndStoreMP3(mp3Url);
-            if (!isDownloading) {
-              showPlayerDialog();
-            }
-          } else {
-            showPlayerDialog(); // If already downloaded, directly open the player
-          }
-        },
+        onPressed: downloadAndShowPlayer,
         label: isDownloading
-            ? CircularProgressIndicator(
-                value: downloadProgress,
-                backgroundColor: Colors.white,
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  value: downloadProgress,
+                  backgroundColor: Colors.white,
+                ),
               )
             : const Text(
                 "Read Aloud",
@@ -152,8 +186,10 @@ class _NewsPageState extends State<NewsPage> {
           children: [
             Icon(Icons.newspaper, size: 30),
             SizedBox(width: 7),
-            Text("Latest News Today!",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+            Text(
+              "Latest News Today!",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            ),
           ],
         ),
       ),

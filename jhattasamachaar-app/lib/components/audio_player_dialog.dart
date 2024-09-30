@@ -1,4 +1,3 @@
-// audio_player_dialog.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -48,9 +47,18 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
     widget.audioPlayer.onPlayerComplete.listen((_) {
       setState(() {
         isPlaying = false;
-        currentPosition = Duration.zero;
+        currentPosition = Duration.zero; // Reset progress when complete
       });
     });
+  }
+
+  @override
+  void dispose() {
+    // Stop the player if it's still playing
+    if (isPlaying) {
+      widget.audioPlayer.stop();
+    }
+    super.dispose();
   }
 
   String formatTime(Duration duration) {
@@ -70,7 +78,7 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        widget.resetPlayer();
+        widget.resetPlayer(); // Reset player when dialog is closed
         return true;
       },
       child: Dialog(
@@ -85,8 +93,9 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                 children: [
                   IconButton(
                     onPressed: () {
+                      widget
+                          .resetPlayer(); // Reset player when close button is pressed
                       Navigator.pop(context);
-                      widget.resetPlayer();
                     },
                     icon: const Icon(Icons.close),
                   ),
@@ -128,28 +137,51 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                   ],
                 ),
               ),
-              CircleAvatar(
-                radius: 30,
-                child: IconButton(
-                  iconSize: 45,
-                  icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                  onPressed: () async {
-                    if (isPlaying) {
-                      await widget.audioPlayer.pause();
-                    } else {
-                      if (widget.mp3FilePath != null &&
-                          File(widget.mp3FilePath!).existsSync()) {
-                        await widget.audioPlayer
-                            .play(DeviceFileSource(widget.mp3FilePath!));
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('No MP3 file available.')),
-                        );
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.replay_10),
+                    onPressed: () {
+                      final newPosition = currentPosition.inSeconds - 10;
+                      if (newPosition >= 0) {
+                        widget.audioPlayer.seek(Duration(seconds: newPosition));
                       }
-                    }
-                  },
-                ),
+                    },
+                  ),
+                  CircleAvatar(
+                    radius: 30,
+                    child: IconButton(
+                      iconSize: 45,
+                      icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                      onPressed: () async {
+                        if (isPlaying) {
+                          await widget.audioPlayer.pause();
+                        } else {
+                          if (widget.mp3FilePath != null &&
+                              File(widget.mp3FilePath!).existsSync()) {
+                            await widget.audioPlayer
+                                .play(DeviceFileSource(widget.mp3FilePath!));
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('No MP3 file available.')),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.forward_10),
+                    onPressed: () {
+                      final newPosition = currentPosition.inSeconds + 10;
+                      if (newPosition <= totalDuration.inSeconds) {
+                        widget.audioPlayer.seek(Duration(seconds: newPosition));
+                      }
+                    },
+                  ),
+                ],
               ),
             ],
           ),

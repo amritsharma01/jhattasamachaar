@@ -20,19 +20,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  User? user;
-  String name = 'User';
-  @override
-  void initState() {
-    super.initState();
-    // Get the current user and set the username
-    user = FirebaseAuth.instance.currentUser;
-    if (user != null && user!.displayName != null) {
-      setState(() {
-        name = user!.displayName!;
-      });
-    }
-  }
 
   final List<Widget> page = [
     const NewsPage(),

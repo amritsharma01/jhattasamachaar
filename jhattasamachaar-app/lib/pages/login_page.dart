@@ -1,5 +1,6 @@
 import 'dart:convert'; // For jsonEncode
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -14,6 +15,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final GoogleSignIn googleSignIn = GoogleSignIn();
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   Future<UserCredential?> signInWithGoogle() async {
     BuildContext? dialogContext;
@@ -115,7 +117,7 @@ class _LoginState extends State<Login> {
 
   Future<void> sendIdTokenToBackend(String idToken) async {
     const String backendUrl =
-        'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/auth/google/'; // Your backend URL here
+        'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/auth/google/';
 
     try {
       final response = await http.post(
@@ -129,14 +131,16 @@ class _LoginState extends State<Login> {
       );
 
       if (response.statusCode == 200) {
-        // Successfully sent ID token to backend
-        print('ID Token sent to backend successfully');
+        // Parse the response to get the token from the backend
+        final token = json.decode(response.body)['token'];
+
+        // Store the token securely
+        await secureStorage.write(key: 'auth_token', value: token);
+        print('Token stored successfully');
       } else {
-        // Handle errors from the backend
-        print('Failed to send ID token to backend: ${response.statusCode}');
+        print('Failed to authenticate with backend: ${response.statusCode}');
       }
     } catch (e) {
-      // Handle network errors
       print('Error sending ID token to backend: $e');
     }
   }
