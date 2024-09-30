@@ -1,8 +1,13 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:jhattasamachaar/components/news_api.dart'; // Update the import according to your project structure
-import 'package:jhattasamachaar/components/news_block.dart'; // Update the import according to your project structure
+import 'package:jhattasamachaar/components/news_api.dart';
+import 'package:jhattasamachaar/components/news_block.dart';
+import 'package:jhattasamachaar/components/audio_player_dialog.dart';
 import 'package:lottie/lottie.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -13,40 +18,110 @@ class NewsPage extends StatefulWidget {
 
 class _NewsPageState extends State<NewsPage> {
   final NewsService newsService = NewsService();
-  final FlutterTts flutterTts = FlutterTts();
-  final List<Map<String, String>> _newsList = [];
+  final Dio dio = Dio();
+  final AudioPlayer audioPlayer = AudioPlayer();
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
-  Future<void> _readTitle(String title) async {
-    await flutterTts
-        .setVoice({"name": "en-us-x-sfg#male_1-local", "locale": "en-US"});
-    await flutterTts.speak(title);
+  String? mp3FilePath;
+  bool isDownloading = false;
+  double downloadProgress = 0.0;
+  List<dynamic>? newsData;
+
+  static const String mp3Url =
+      'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/news/mp3/';
+
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    super.dispose();
   }
 
-  Future<void> _readDescription(String description) async {
-    await flutterTts
-        .setVoice({"name": "en-us-x-tpd#male_2-local", "locale": "en-US"});
-    await flutterTts.speak(description);
+  @override
+  void initState() {
+    super.initState();
+    fetchNews();
   }
 
-  Future<void> _readNewsArticle(Map<String, String> article) async {
-    String title = article['title'] ?? 'No Title';
-    String description = article['description'] ?? 'No Description';
-
-    await _readTitle(title);
-    await flutterTts.awaitSpeakCompletion(true); // Wait for title to be spoken
-    await Future.delayed(const Duration(
-        seconds: 1)); // Optional delay between title and description
-    await _readDescription(description);
-    await flutterTts
-        .awaitSpeakCompletion(true); // Wait for description to be spoken
+  Future<void> fetchNews() async {
+    final fetchedNews = await newsService.fetchNews();
+    setState(() {
+      newsData = fetchedNews;
+    });
   }
 
-  Future<void> _readAllNews() async {
-    for (var news in _newsList) {
-      await _readNewsArticle(news);
-      await Future.delayed(
-          const Duration(seconds: 1)); // Optional delay between articles
+  Future<String?> getToken() async {
+    return await secureStorage.read(key: 'auth_token');
+  }
+
+  Future<void> downloadMP3(String url) async {
+    try {
+      Directory appDir = await getApplicationDocumentsDirectory();
+      mp3FilePath = '${appDir.path}/news_audio.mp3';
+
+      String? token = await getToken();
+      if (token == null) {
+        throw Exception('Authentication token not found. Please log in again.');
+      }
+
+      await dio.download(
+        url,
+        mp3FilePath!,
+        options: Options(
+          headers: {
+            'Authorization': 'Token $token',
+          },
+        ),
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            setState(() {
+              downloadProgress = received / total;
+            });
+          }
+        },
+      );
+
+      setState(() {
+        isDownloading = false;
+        downloadProgress = 1.0; // Download complete
+      });
+    } catch (e) {
+      setState(() {
+        isDownloading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to download audio: $e')),
+      );
     }
+  }
+
+  Future<void> downloadAndShowPlayer() async {
+    setState(() {
+      isDownloading = true;
+    });
+
+    await downloadMP3(mp3Url);
+    showPlayerDialog();
+  }
+
+  void showPlayerDialog() {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return AudioPlayerDialog(
+          audioPlayer: audioPlayer,
+          mp3FilePath: mp3FilePath,
+          resetPlayer: resetPlayer,
+        );
+      },
+    );
+  }
+
+  void resetPlayer() {
+    audioPlayer.stop();
+    setState(() {
+      downloadProgress = 0.0;
+    });
   }
 
   @override
@@ -54,14 +129,20 @@ class _NewsPageState extends State<NewsPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.green.shade200,
-        onPressed: () {
-          // Read all stored news
-          _readAllNews();
-        },
-        label: const Text(
-          "Read Aloud",
-          style: TextStyle(fontSize: 17),
-        ),
+        onPressed: downloadAndShowPlayer,
+        label: isDownloading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  value: downloadProgress,
+                  backgroundColor: Colors.white,
+                ),
+              )
+            : const Text(
+                "Read Aloud",
+                style: TextStyle(fontSize: 17),
+              ),
         icon: const Icon(
           Icons.speaker_phone,
           size: 30,
@@ -73,13 +154,8 @@ class _NewsPageState extends State<NewsPage> {
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.newspaper,
-              size: 30,
-            ),
-            SizedBox(
-              width: 7,
-            ),
+            Icon(Icons.newspaper, size: 30),
+            SizedBox(width: 7),
             Text(
               "Latest News Today!",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
@@ -87,56 +163,28 @@ class _NewsPageState extends State<NewsPage> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 5,
-          ),
-          Expanded(
-            child: FutureBuilder<List<dynamic>>(
-              future: newsService.fetchNews(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                      child: SizedBox(
-                    height: 100,
-                    child: Lottie.asset("lib/assets/animations/loading.json"),
-                  ));
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No news available.'));
-                } else {
-                  _newsList.clear();
-                  for (var article in snapshot.data!) {
-                    String title = article['title'] ?? 'No Title';
-                    String description =
-                        article['description'] ?? 'No Description';
-                    _newsList.add({'title': title, 'description': description});
-                  }
+      body: newsData == null
+          ? Center(
+              child: SizedBox(
+                height: 100,
+                child: Lottie.asset("lib/assets/animations/loading.json"),
+              ),
+            )
+          : ListView.builder(
+              itemCount: newsData!.length,
+              itemBuilder: (context, index) {
+                var article = newsData![index];
+                String title = article['title'] ?? 'No Title';
+                String imgurl = article['og_image_url'] ?? "";
+                String description = article['summary'] ?? 'No Description';
 
-                  return ListView.builder(
-                    itemCount: 4,
-                    itemBuilder: (context, index) {
-                      var article = _newsList[index];
-                      String title = article['title'] ?? 'No Title';
-                      String description =
-                          article['description'] ?? 'No Description';
-
-                      return NewsTile(
-                        title: title,
-                        description: description,
-                        imageurl:
-                            "https://play-lh.googleusercontent.com/_ahCmEdTn8h5omlAg0jg9Y15KArlptm4qcbnyWSzGU-jM4mR1LeArqbMM7DzgZjNywO2",
-                      );
-                    },
-                  );
-                }
+                return NewsTile(
+                  title: title,
+                  description: description,
+                  imageurl: imgurl,
+                );
               },
             ),
-          ),
-        ],
-      ),
     );
   }
 }

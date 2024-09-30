@@ -1,10 +1,10 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:jhattasamachaar/components/news_page.dart';
+
+import 'package:jhattasamachaar/pages/news_page.dart';
 import 'package:jhattasamachaar/pages/account_page.dart';
-import 'package:lottie/lottie.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

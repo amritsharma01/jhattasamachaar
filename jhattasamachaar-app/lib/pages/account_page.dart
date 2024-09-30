@@ -112,37 +112,40 @@ class _AccountPageState extends State<AccountPage> {
                     );
                   },
                 );
-
+                await GoogleSignIn().signOut();
+                await FirebaseAuth.instance.signOut();
+                Navigator.pop(context);
+                Navigator.pop(context);
                 // Retrieve the token from secure storage
-                const FlutterSecureStorage secureStorage =
-                    FlutterSecureStorage();
-                String? token = await secureStorage.read(key: 'auth_token');
-                print(token);
-                // Send a POST request to the backend to log out
-                final response = await http.post(
-                  Uri.parse(
-                      '$api/api/auth/logout/'), // Replace with your backend logout URL
-                  headers: {
-                    'Authorization': 'Token $token',
-                    'Content-Type': 'application/json',
-                  },
-                );
+                // const FlutterSecureStorage secureStorage =
+                //     FlutterSecureStorage();
+                // String? token = await secureStorage.read(key: 'auth_token');
+                // print(token);
+                // // Send a POST request to the backend to log out
+                // final response = await http.post(
+                //   Uri.parse(
+                //       '$api/api/auth/logout/'), // Replace with your backend logout URL
+                //   headers: {
+                //     'Authorization': 'Token $token',
+                //     'Content-Type': 'application/json',
+                //   },
+                // );
 
-                if (response.statusCode == 204) {
-                  // Successfully logged out from backend
-                  await GoogleSignIn().signOut();
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.pop(context); // Close the loading dialog
-                  Navigator.pop(context); // Go back to the previous screen
-                } else {
-                  // Handle error from backend
-                  Navigator.pop(context); // Close loading dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content:
-                            Text('Backend logout failed: ${response.body}')),
-                  );
-                }
+                // if (response.statusCode == 204) {
+                //   // Successfully logged out from backend
+                //   await GoogleSignIn().signOut();
+                //   await FirebaseAuth.instance.signOut();
+                //   Navigator.pop(context); // Close the loading dialog
+                //   Navigator.pop(context); // Go back to the previous screen
+                // } else {
+                //   // Handle error from backend
+                //   Navigator.pop(context); // Close loading dialog
+                //   ScaffoldMessenger.of(context).showSnackBar(
+                //     SnackBar(
+                //         content:
+                //             Text('Backend logout failed: ${response.body}')),
+                //   );
+                // }
               },
               child: Container(
                 width: 80,

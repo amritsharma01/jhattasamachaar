@@ -12,7 +12,7 @@ class NewsService {
     await secureStorage.write(
         key: 'auth_token',
         value:
-            "252c88607bb009794854051ba291209dd889cb005f38272dd586a54304b417b2");
+            "6ca2c9021676b61b13484067f6f6c664df98e6bd94264219d02a60b25ee2e1fd");
     final token = await secureStorage.read(key: 'auth_token');
     if (token == null) throw Exception('Token not found');
 
