@@ -135,7 +135,7 @@ class _LoginState extends State<Login> {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode.toString().startsWith("2")) {
         // Parse the response to get the token from the backend
         final token = json.decode(response.body)['token'];
 

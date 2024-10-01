@@ -9,10 +9,10 @@ class NewsService {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   Future<List<dynamic>> fetchNews() async {
-    await secureStorage.write(
-        key: 'auth_token',
-        value:
-            "652ddcade00f07457f8dc87527b2954c6ebc4fc10a7ebdc5211ef655fdb26a6b");
+    // await secureStorage.write(
+    //     key: 'auth_token',
+    //     value:
+    //         "652ddcade00f07457f8dc87527b2954c6ebc4fc10a7ebdc5211ef655fdb26a6b");
     final token = await secureStorage.read(key: 'auth_token');
     if (token == null) throw Exception('Token not found');
 
