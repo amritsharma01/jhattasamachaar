@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:jhattasamachaar/components/settings_tile.dart';
 import 'package:jhattasamachaar/globals/api_link.dart';
+import 'package:jhattasamachaar/pages/login_page.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:lottie/lottie.dart';
 
@@ -116,6 +117,10 @@ class _AccountPageState extends State<AccountPage> {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pop(context);
                 Navigator.pop(context);
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) {
+                  return const Login();
+                }));
                 // Retrieve the token from secure storage
                 // const FlutterSecureStorage secureStorage =
                 //     FlutterSecureStorage();

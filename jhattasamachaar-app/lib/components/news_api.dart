@@ -12,7 +12,7 @@ class NewsService {
     await secureStorage.write(
         key: 'auth_token',
         value:
-            "6ca2c9021676b61b13484067f6f6c664df98e6bd94264219d02a60b25ee2e1fd");
+            "652ddcade00f07457f8dc87527b2954c6ebc4fc10a7ebdc5211ef655fdb26a6b");
     final token = await secureStorage.read(key: 'auth_token');
     if (token == null) throw Exception('Token not found');
 
@@ -23,7 +23,7 @@ class NewsService {
       },
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode.toString().startsWith("2")) {
       return json.decode(response.body)['results'];
     } else {
       throw Exception('Failed to load news');

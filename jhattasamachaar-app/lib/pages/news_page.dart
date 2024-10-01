@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jhattasamachaar/components/news_api.dart';
 import 'package:jhattasamachaar/components/news_block.dart';
 import 'package:jhattasamachaar/components/audio_player_dialog.dart';
+import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -26,9 +27,10 @@ class _NewsPageState extends State<NewsPage> {
   bool isDownloading = false;
   double downloadProgress = 0.0;
   List<dynamic>? newsData;
+  final String api = Globals.link;
 
-  static const String mp3Url =
-      'https://9m9gxp5m-8000.inc1.devtunnels.ms/api/news/mp3/';
+  late String mp3Url =
+      '$api/api/news/mp3/';
 
   @override
   void dispose() {

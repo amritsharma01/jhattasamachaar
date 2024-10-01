@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jhattasamachaar/globals/api_link.dart';
+import 'package:jhattasamachaar/pages/home_page.dart';
 import 'package:lottie/lottie.dart';
 
 class Login extends StatefulWidget {
@@ -67,17 +68,20 @@ class _LoginState extends State<Login> {
           await FirebaseAuth.instance.signInWithCredential(credential);
 
       // Close the loading dialog
-      if (dialogContext != null) {
-        Navigator.pop(dialogContext!); // Close the loading dialog
-      }
-
+      
       // Send ID token to the backend
       final idToken = await userCredential.user?.getIdToken();
       if (idToken != null) {
         await sendIdTokenToBackend(idToken);
       }
+      if (dialogContext != null) {
+        Navigator.pop(dialogContext!); // Close the loading dialog
+      }
 
-      return userCredential;
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
+        return HomePage();
+      }));
+      return null;
     } on FirebaseAuthException catch (e) {
       // Close the loading dialog in case of an error
       if (dialogContext != null) {
