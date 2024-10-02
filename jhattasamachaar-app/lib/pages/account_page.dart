@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:jhattasamachaar/components/settings_tile.dart';
 import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:jhattasamachaar/pages/login_page.dart';
+import 'package:jhattasamachaar/pages/preference_page.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:lottie/lottie.dart';
 
@@ -21,7 +22,8 @@ class _AccountPageState extends State<AccountPage> {
   User? user;
   String name = 'User';
   String email = "user@user.com";
-  String photoUrl = "lib/assets/images/user.png";
+  String photoUrl =
+      "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg";
   final String api = Globals.link;
 
   @override
@@ -41,7 +43,8 @@ class _AccountPageState extends State<AccountPage> {
       });
     } else {
       // Set a default image or a placeholder
-      photoUrl = "lib/assets/images/user.png";
+      photoUrl =
+          "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg";
     }
   }
 
@@ -142,8 +145,8 @@ class _AccountPageState extends State<AccountPage> {
                   await FirebaseAuth.instance.signOut();
                   Navigator.pop(context); // Close the loading dialog
                   Navigator.pop(context);
-                   // Go back to the previous screen
-                    Navigator.pushReplacement(context,
+                  // Go back to the previous screen
+                  Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) {
                     return const Login();
                   }));
@@ -273,10 +276,16 @@ class _AccountPageState extends State<AccountPage> {
               ontap: showQr,
             ),
             SettingsTile(
-              icon: Icons.notification_important_rounded,
-              name: "Notifications",
+              icon: Icons.monitor_heart,
+              name: "Preferences",
               color: Colors.grey.shade300,
-              ontap: () {},
+              ontap: () {
+                Navigator.push(context, MaterialPageRoute(builder: ((context) {
+                  return Preference(
+                    isUpdating: true,
+                  );
+                })));
+              },
             ),
             SettingsTile(
               icon: Icons.phone,

@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:jhattasamachaar/firebase_options.dart';
 import 'package:jhattasamachaar/pages/auth_page.dart';
+import 'package:jhattasamachaar/pages/home_page.dart';
 import 'package:jhattasamachaar/pages/login_page.dart';
+import 'package:jhattasamachaar/pages/preference_page.dart';
 
 
 void main() async {

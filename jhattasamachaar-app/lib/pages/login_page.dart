@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:jhattasamachaar/pages/home_page.dart';
+import 'package:jhattasamachaar/pages/preference_page.dart';
 import 'package:lottie/lottie.dart';
 
 class Login extends StatefulWidget {
@@ -19,6 +20,7 @@ class _LoginState extends State<Login> {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final String api = Globals.link;
+  bool isNew = true;
 
   Future<UserCredential?> signInWithGoogle() async {
     BuildContext? dialogContext;
@@ -68,7 +70,7 @@ class _LoginState extends State<Login> {
           await FirebaseAuth.instance.signInWithCredential(credential);
 
       // Close the loading dialog
-      
+
       // Send ID token to the backend
       final idToken = await userCredential.user?.getIdToken();
       if (idToken != null) {
@@ -78,9 +80,18 @@ class _LoginState extends State<Login> {
         Navigator.pop(dialogContext!); // Close the loading dialog
       }
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
-        return HomePage();
-      }));
+      if (isNew) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) {
+          return Preference(isUpdating: false,);
+        }));
+      }
+      else{
+          Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) {
+          return HomePage();
+        }));
+      }
       return null;
     } on FirebaseAuthException catch (e) {
       // Close the loading dialog in case of an error
@@ -136,12 +147,15 @@ class _LoginState extends State<Login> {
       );
 
       if (response.statusCode.toString().startsWith("2")) {
-        // Parse the response to get the token from the backend
-        final token = json.decode(response.body)['token'];
-
+        // Parse the response to get the token and new_user status from the backend
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        final token = responseData['token'];
+        final bool isNewUser = responseData['new_user'];
+        setState(() {
+          isNew = isNewUser;
+        });
         // Store the token securely
         await secureStorage.write(key: 'auth_token', value: token);
-        print('Token stored successfully');
       } else {
         print('Failed to authenticate with backend: ${response.statusCode}');
       }
