@@ -9,7 +9,7 @@ class NewsService {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   Future<List<dynamic>> fetchNews() async {
-   
+    //retrieve the token from secure storage
     final token = await secureStorage.read(key: 'auth_token');
     if (token == null) throw Exception('Token not found');
 
@@ -23,7 +23,7 @@ class NewsService {
     if (response.statusCode.toString().startsWith("2")) {
       return json.decode(response.body)['results'];
     } else {
-      throw Exception('Failed to load news');
+      throw Exception('Failed to load news, refresh');
     }
   }
 }

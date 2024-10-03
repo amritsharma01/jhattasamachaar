@@ -83,13 +83,16 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
       },
       child: Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(15),
         ),
-        child: SizedBox(
-          height: 420,
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
                     onPressed: () {
@@ -97,51 +100,64 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                           .resetPlayer(); // Reset player when close button is pressed
                       Navigator.pop(context);
                     },
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, color: Colors.grey),
                   ),
                 ],
               ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    "lib/assets/images/news.jpg",
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image.asset(
+                  "lib/assets/images/news.jpg",
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 10),
-              Slider(
-                min: 0,
-                max: totalDuration.inSeconds.toDouble(),
-                value: currentPosition.inSeconds.toDouble(),
-                onChanged: (value) async {
-                  await widget.audioPlayer
-                      .seek(Duration(seconds: value.toInt()));
-                  setState(() {
-                    currentPosition = Duration(seconds: value.toInt());
-                  });
-                },
+              const SizedBox(height: 20),
+              SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 3,
+                  thumbShape:
+                      const RoundSliderThumbShape(enabledThumbRadius: 8),
+                ),
+                child: Slider(
+                  min: 0,
+                  max: totalDuration.inSeconds.toDouble(),
+                  value: currentPosition.inSeconds.toDouble(),
+                  onChanged: (value) async {
+                    await widget.audioPlayer
+                        .seek(Duration(seconds: value.toInt()));
+                    setState(() {
+                      currentPosition = Duration(seconds: value.toInt());
+                    });
+                  },
+                  activeColor: Colors.blueAccent,
+                  inactiveColor: Colors.grey[300],
+                ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(formatTime(currentPosition)),
-                    Text(formatTime(totalDuration - currentPosition)),
+                    Text(
+                      formatTime(currentPosition),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    Text(
+                      formatTime(totalDuration - currentPosition),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
                   ],
                 ),
               ),
+              const SizedBox(height: 10),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.replay_10),
+                    icon: const Icon(Icons.replay_10, color: Colors.blueAccent),
+                    iconSize: 32,
                     onPressed: () {
                       final newPosition = currentPosition.inSeconds - 10;
                       if (newPosition >= 0) {
@@ -151,9 +167,13 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                   ),
                   CircleAvatar(
                     radius: 30,
+                    backgroundColor: Colors.blueAccent,
                     child: IconButton(
-                      iconSize: 45,
-                      icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                      iconSize: 40,
+                      icon: Icon(
+                        isPlaying ? Icons.pause : Icons.play_arrow,
+                        color: Colors.white,
+                      ),
                       onPressed: () async {
                         if (isPlaying) {
                           await widget.audioPlayer.pause();
@@ -173,7 +193,9 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.forward_10),
+                    icon:
+                        const Icon(Icons.forward_10, color: Colors.blueAccent),
+                    iconSize: 32,
                     onPressed: () {
                       final newPosition = currentPosition.inSeconds + 10;
                       if (newPosition <= totalDuration.inSeconds) {
@@ -183,6 +205,7 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                   ),
                 ],
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

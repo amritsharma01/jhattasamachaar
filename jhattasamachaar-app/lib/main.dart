@@ -1,19 +1,28 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jhattasamachaar/firebase_options.dart';
-import 'package:jhattasamachaar/pages/auth_page.dart';
 import 'package:jhattasamachaar/pages/home_page.dart';
 import 'package:jhattasamachaar/pages/login_page.dart';
-import 'package:jhattasamachaar/pages/preference_page.dart';
-
-
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // compulsory for firebase
+  WidgetsFlutterBinding.ensureInitialized(); // compulsory for Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: Login(),
-  ));
+  // Initialize secure storage
+  const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  String? token = await secureStorage.read(key: 'auth_token');
+  runApp(MyApp(token: token));
+}
+
+class MyApp extends StatelessWidget {
+  final String? token;
+  const MyApp({Key? key, this.token}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: token != null ? HomePage() : const Login(),
+    );
+  }
 }

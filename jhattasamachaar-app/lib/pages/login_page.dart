@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 import 'dart:convert'; // For jsonEncode
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -11,7 +12,6 @@ import 'package:lottie/lottie.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
-
   @override
   State<Login> createState() => _LoginState();
 }
@@ -21,10 +21,8 @@ class _LoginState extends State<Login> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final String api = Globals.link;
   bool isNew = true;
-
   Future<UserCredential?> signInWithGoogle() async {
     BuildContext? dialogContext;
-
     try {
       // Check if user is already signed in
       final currentUser = googleSignIn.currentUser;
@@ -35,7 +33,6 @@ class _LoginState extends State<Login> {
         await FirebaseAuth.instance.signOut();
       }
 
-      // Show loading dialog
       showDialog(
         barrierColor: Colors.black54,
         context: context,
@@ -54,7 +51,9 @@ class _LoginState extends State<Login> {
       // Start Google sign-in process
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
-        return null; // The user canceled the sign-in process
+        Navigator.pop(context);
+        return null;
+        // if the  user canceled the sign-in process
       }
 
       final GoogleSignInAuthentication googleAuth =
@@ -69,8 +68,6 @@ class _LoginState extends State<Login> {
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
 
-      // Close the loading dialog
-
       // Send ID token to the backend
       final idToken = await userCredential.user?.getIdToken();
       if (idToken != null) {
@@ -83,13 +80,14 @@ class _LoginState extends State<Login> {
       if (isNew) {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-          return Preference(isUpdating: false,);
+          return Preference(
+            isUpdating: false,
+          );
         }));
-      }
-      else{
-          Navigator.pushReplacement(context,
+      } else {
+        Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-          return HomePage();
+          return  HomePage();
         }));
       }
       return null;
@@ -98,10 +96,8 @@ class _LoginState extends State<Login> {
       if (dialogContext != null) {
         Navigator.pop(dialogContext!);
       }
-
       // Check if the widget is still mounted before using context
       if (!mounted) return null;
-
       // Show error dialog
       showDialog(
         context: context,
@@ -127,11 +123,29 @@ class _LoginState extends State<Login> {
       if (dialogContext != null) {
         Navigator.pop(dialogContext!);
       }
-      print('An error occurred: $e');
+      showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: Text("ERROR!", style: TextStyle(color: Colors.red[500])),
+            content: const Text("An error occurred during Google sign-in."),
+            actions: [
+              MaterialButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: const Text("OK",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      );
     }
     return null;
   }
 
+  //finction to send users token to backend server
   Future<void> sendIdTokenToBackend(String idToken) async {
     String backendUrl = '$api/api/auth/google/';
 
@@ -157,10 +171,47 @@ class _LoginState extends State<Login> {
         // Store the token securely
         await secureStorage.write(key: 'auth_token', value: token);
       } else {
-        print('Failed to authenticate with backend: ${response.statusCode}');
+        // show error dialog when authentication with backend is failed
+        showDialog(
+          context: context,
+          builder: (BuildContext ctx) {
+            return AlertDialog(
+              title: Text("ERROR!", style: TextStyle(color: Colors.red[500])),
+              content: Text(
+                  "Failed to authenticate with server${response.statusCode.toString()}, try again"),
+              actions: [
+                MaterialButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text("OK",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
       }
     } catch (e) {
-      print('Error sending ID token to backend: $e');
+      // show error dialog when token cant be sent to server due to some reasons
+      showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: Text("ERROR!", style: TextStyle(color: Colors.red[500])),
+            content: Text(e.toString()),
+            actions: [
+              MaterialButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: const Text("OK",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 

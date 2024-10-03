@@ -1,3 +1,3 @@
 class Globals {
-  static const String link = 'http://192.168.1.3:8000';
+  static const String link = 'https://9m9gxp5m-8000.inc1.devtunnels.ms';
 }

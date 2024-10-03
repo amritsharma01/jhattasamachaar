@@ -7,9 +7,9 @@ import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:jhattasamachaar/pages/home_page.dart';
 
 class Preference extends StatefulWidget {
-  bool isUpdating;
+  final bool isUpdating;
 
-  Preference({super.key, required this.isUpdating});
+  const Preference({super.key, required this.isUpdating});
 
   @override
   State<Preference> createState() => _PreferenceState();
@@ -72,7 +72,6 @@ class _PreferenceState extends State<Preference> {
         categories = fetchedCategories;
       });
     });
-    print("Welcome");
     if (widget.isUpdating) {
       fetchUserPreferences(); // Fetch preferences if updating
     }
@@ -163,7 +162,7 @@ class _PreferenceState extends State<Preference> {
           !widget.isUpdating
               ? GestureDetector(
                   onTap: () {
-                      Navigator.pushReplacement(context,
+                    Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (builder) {
                       return const HomePage();
                     }));
@@ -180,36 +179,40 @@ class _PreferenceState extends State<Preference> {
                             EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         child: Text(
                           "Skip",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.black),
                         ),
                       ),
                     ),
                   ),
                 )
-              : const Text("")
+              : const SizedBox.shrink()
         ],
-        backgroundColor: Colors.grey.shade100,
-        automaticallyImplyLeading: widget.isUpdating ? true : false,
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: widget.isUpdating,
       ),
       body: Column(
         children: [
+          const SizedBox(height: 20),
           const Text(
             "Select your preferred categories",
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 1.8,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
+                  childAspectRatio: 1.5,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
                 ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
@@ -220,27 +223,22 @@ class _PreferenceState extends State<Preference> {
                     onTap: () {
                       togglePreference(category.id);
                     },
-                    child: Container(
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: isSelected
-                            ? Colors.grey.shade300
-                            : Colors.grey[200],
-                        border: Border.all(
-                          color: isSelected
-                              ? Colors.grey.shade600
-                              : Colors.grey.shade400,
-                          width: 2,
-                        ),
+                    child: Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      color: isSelected
+                          ? Colors.lightBlueAccent.withOpacity(0.3)
+                          : Colors.white,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Image.asset(
                             "lib/assets/images/${category.name.toLowerCase()}.png",
-                            height: 50,
+                            height: 60,
+                            fit: BoxFit.cover,
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -248,6 +246,7 @@ class _PreferenceState extends State<Preference> {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
+                              fontSize: 16,
                             ),
                           ),
                         ],
@@ -264,19 +263,22 @@ class _PreferenceState extends State<Preference> {
               padding: const EdgeInsets.symmetric(vertical: 25.0),
               child: Container(
                 decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                      width: 2,
-                    ),
-                    color: Colors.blue.shade200,
-                    borderRadius: BorderRadius.circular(18)),
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
+                    borderRadius: BorderRadius.circular(18),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.blue.shade300,
+                        Colors.blue.shade700,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )),
+                child: const Padding(
+                  padding: EdgeInsets.all(15),
                   child: Text(
                     "Submit Preferences",
                     style: TextStyle(
-                        color: Colors.grey[900],
-                        fontSize: 17,
+                        color: Colors.white,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                 ),
