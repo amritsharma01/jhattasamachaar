@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:jhattasamachaar/components/sample_dialog.dart';
 import 'package:jhattasamachaar/components/settings_tile.dart';
+import 'package:jhattasamachaar/components/tokennotfound.dart';
 import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:jhattasamachaar/pages/about_us_page.dart';
 import 'package:jhattasamachaar/pages/login_page.dart';
@@ -39,55 +41,83 @@ class _AccountPageState extends State<AccountPage> {
   Future<void> fetchProfileData() async {
     const FlutterSecureStorage secureStorage = FlutterSecureStorage();
     String? token = await secureStorage.read(key: 'auth_token');
-
-    final response = await http.get(
-      Uri.parse('$api/api/auth/profile/'),
-      headers: {
-        'Authorization': 'Token $token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final profileData = jsonDecode(response.body);
-
-      setState(() {
-        // Update the data extraction according to the new response structure
-        name = profileData['user']['first_name'] +
-                " " +
-                profileData['user']['last_name'] ??
-            'User';
-        email = profileData['user']['email'] ?? 'user@user.com';
-        photoUrl = profileData['picture'] ?? 'lib/assets/images/user.png';
-
-        // Extract likes and dislikes from the new response structure
-        likes = profileData['likes']
-                ?.map((like) => {
-                      'name': like['name'],
-                    })
-                .toList() ??
-            [];
-
-        dislikes = profileData['dislikes']
-                ?.map((dislike) => {
-                      'name': dislike['name'],
-                    })
-                .toList() ??
-            [];
-      });
+    if (token == null) {
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) {
+            return const TokenNotFound();
+          });
     } else {
-      // Handle error here, maybe show a message to the user.
-      print('Failed to fetch profile data: ${response.body}');
+      final response = await http.get(
+        Uri.parse('$api/api/auth/profile/'),
+        headers: {
+          'Authorization': 'Token $token',
+        },
+      );
+
+      if (response.statusCode.toString().startsWith("2")) {
+        final profileData = jsonDecode(response.body);
+
+        setState(() {
+          // Update the data extraction according to the new response structure
+          name = profileData['user']['first_name'] +
+                  " " +
+                  profileData['user']['last_name'] ??
+              'User';
+          email = profileData['user']['email'] ?? 'user@user.com';
+          photoUrl = profileData['picture'] ?? 'lib/assets/images/user.png';
+
+          // Extract likes and dislikes from the new response structure
+          likes = profileData['likes']
+                  ?.map((like) => {
+                        'name': like['name'],
+                      })
+                  .toList() ??
+              [];
+
+          dislikes = profileData['dislikes']
+                  ?.map((dislike) => {
+                        'name': dislike['name'],
+                      })
+                  .toList() ??
+              [];
+        });
+      } else {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return SampleDialog(
+                  title: "Error",
+                  description: "Failed to communicate with the server",
+                  perform: () {},
+                  buttonText: "Ok");
+            });
+      }
     }
   }
 
   void showQr() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Lottie.asset(
+                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+              ),
+            ),
+          );
+        });
     final qrData = {
       'name': name,
       'email': email,
       'likes': likes,
       'dislikes': dislikes,
     };
-
+    Navigator.pop(context);
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -149,7 +179,22 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   void rateUs() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Lottie.asset(
+                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+              ),
+            ),
+          );
+        });
     await LaunchReview.launch(androidAppId: "com.example.app", iOSAppId: "");
+    Navigator.pop(context);
   }
 
   void signOut() {
@@ -157,7 +202,7 @@ class _AccountPageState extends State<AccountPage> {
       barrierDismissible: false,
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return AlertDialog.adaptive(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -224,32 +269,48 @@ class _AccountPageState extends State<AccountPage> {
                 const FlutterSecureStorage secureStorage =
                     FlutterSecureStorage();
                 String? token = await secureStorage.read(key: 'auth_token');
-
-                final response = await http.post(
-                  Uri.parse('$api/api/auth/logout/'),
-                  headers: {
-                    'Authorization': 'Token $token',
-                    'Content-Type': 'application/json',
-                  },
-                );
-
-                if (response.statusCode == 204) {
-                  await FirebaseAuth.instance.signOut();
-                  await GoogleSignIn().signOut();
-                  Navigator.pop(context); // Close loading dialog
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) {
-                    return const Login();
-                  }));
-                } else {
-                  Navigator.pop(context); // Close loading dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content:
-                            Text('Backend logout failed: ${response.body}')),
-                  );
+                if (token == null) {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const TokenNotFound();
+                      });
                 }
+                else{
+                     final response = await http.post(
+                    Uri.parse('$api/api/auth/logout/'),
+                    headers: {
+                      'Authorization': 'Token $token',
+                      'Content-Type': 'application/json',
+                    },
+                  );
+                  
+                  if (response.statusCode.toString().startsWith("2")) {
+                    await FirebaseAuth.instance.signOut();
+                    await GoogleSignIn().signOut();
+                    Navigator.pop(context); // Close loading dialog
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) {
+                      return const Login();
+                    }));
+                  } else {
+                    Navigator.pop(context); // Close loading dialog
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return SampleDialog(
+                              title: "Error",
+                              description: "Problem logging out, retry",
+                              perform: () {
+                                Navigator.pop(context);
+                              },
+                              buttonText: "Ok");
+                        });
+                  }
+                }
+             
+
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade400,
@@ -371,7 +432,7 @@ class _AccountPageState extends State<AccountPage> {
             SettingsTile(
               icon: Icons.logout_sharp,
               name: "Log Out",
-              color: Colors.blue.shade300,
+              color: Colors.blue.shade400,
               ontap: signOut,
             ),
           ],

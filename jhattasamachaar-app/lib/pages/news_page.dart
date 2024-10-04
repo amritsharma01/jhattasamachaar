@@ -1,8 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:jhattasamachaar/components/news_api.dart';
 import 'package:jhattasamachaar/components/audio_player_dialog.dart';
+import 'package:jhattasamachaar/components/sample_dialog.dart';
+import 'package:jhattasamachaar/components/tokennotfound.dart';
 import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:jhattasamachaar/pages/news_detail.dart';
 import 'package:lottie/lottie.dart';
@@ -45,14 +49,22 @@ class _NewsPageState extends State<NewsPage> {
 
   Future<void> fetchNews() async {
     try {
-      final fetchedNews = await newsService.fetchNews();
+      final fetchedNews = await newsService.fetchNews(context);
       setState(() {
         newsData = fetchedNews;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch news: $e')),
-      );
+      showDialog(
+        barrierDismissible: false,
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+              title: "Error!",
+              description: "Failed to load news, refresh",
+              perform: () {},
+              buttonText: "Ok",
+            );
+          });
     }
   }
 
@@ -67,30 +79,35 @@ class _NewsPageState extends State<NewsPage> {
 
       String? token = await getToken();
       if (token == null) {
-        throw Exception('Authentication token not found. Please log in again.');
-      }
-
-      await dio.download(
-        url,
-        mp3FilePath!,
-        options: Options(
-          headers: {
-            'Authorization': 'Token $token',
-          },
-        ),
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            setState(() {
-              downloadProgress = received / total;
+        showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) {
+              return const TokenNotFound();
             });
-          }
-        },
-      );
+      } else {
+        await dio.download(
+          url,
+          mp3FilePath!,
+          options: Options(
+            headers: {
+              'Authorization': 'Token $token',
+            },
+          ),
+          onReceiveProgress: (received, total) {
+            if (total != -1) {
+              setState(() {
+                downloadProgress = received / total;
+              });
+            }
+          },
+        );
 
-      setState(() {
-        isDownloading = false;
-        downloadProgress = 1.0; // Download complete
-      });
+        setState(() {
+          isDownloading = false;
+          downloadProgress = 1.0; // Download complete
+        });
+      }
     } catch (e) {
       setState(() {
         isDownloading = false;

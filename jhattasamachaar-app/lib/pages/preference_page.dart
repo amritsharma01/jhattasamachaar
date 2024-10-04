@@ -1,68 +1,31 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:jhattasamachaar/components/category_model.dart';
+import 'package:jhattasamachaar/components/sample_dialog.dart';
+import 'package:jhattasamachaar/components/tokennotfound.dart';
 import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:jhattasamachaar/pages/home_page.dart';
+import 'package:lottie/lottie.dart';
 
 class Preference extends StatefulWidget {
-  final bool isUpdating;
-
   const Preference({super.key, required this.isUpdating});
+
+  final bool isUpdating;
 
   @override
   State<Preference> createState() => _PreferenceState();
 }
 
 class _PreferenceState extends State<Preference> {
-  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final String api = Globals.link;
   List<Category> categories = [];
-  List<int> likes = [];
   List<int> dislikes = [];
-
-  Future<List<Category>> fetchCategories() async {
-    final token = await secureStorage.read(key: 'auth_token');
-    final response = await http.get(
-      Uri.parse('$api/api/news/category/'),
-      headers: {
-        'Authorization': 'Token $token',
-      },
-    );
-
-    if (response.statusCode.toString().startsWith("2")) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => Category.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load categories');
-    }
-  }
-
-  Future<void> fetchUserPreferences() async {
-    final token = await secureStorage.read(key: 'auth_token');
-    if (!widget.isUpdating) return; // Only fetch preferences when updating
-
-    final response = await http.get(
-      Uri.parse('$api/api/auth/profile/'),
-      headers: {
-        'Authorization': 'Token $token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        likes =
-            (data['likes'] as List).map((like) => like['id'] as int).toList();
-        dislikes = (data['dislikes'] as List)
-            .map((dislike) => dislike['id'] as int)
-            .toList();
-      });
-    } else {
-      throw Exception('Failed to fetch preferences');
-    }
-  }
+  List<int> likes = [];
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -74,6 +37,109 @@ class _PreferenceState extends State<Preference> {
     });
     if (widget.isUpdating) {
       fetchUserPreferences(); // Fetch preferences if updating
+    }
+  }
+
+  Future<List<Category>> fetchCategories() async {
+    final token = await secureStorage.read(key: 'auth_token');
+    if (token == null) {
+      showDialog(
+        barrierDismissible: false,
+          context: context,
+          builder: (context) {
+            return const TokenNotFound();
+          });
+    }
+    else{
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Lottie.asset(
+                  'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+                ),
+              ),
+            );
+          });
+      final response = await http.get(
+        Uri.parse('$api/api/news/category/'),
+        headers: {
+          'Authorization': 'Token $token',
+        },
+      );
+
+      if (response.statusCode.toString().startsWith("2")) {
+        Navigator.pop(context);
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((json) => Category.fromJson(json)).toList();
+      } else {
+        Navigator.pop(context);
+        showDialog(
+            context: context,
+            builder: (context) {
+              return SampleDialog(
+                  title: "Error",
+                  description: "Failed to load categories",
+                  perform: () {
+                    Navigator.pop(context);
+                  },
+                  buttonText: "Close");
+            });
+     
+      }
+    }
+     throw Exception("Error");
+  }
+
+  Future<void> fetchUserPreferences() async {
+    final token = await secureStorage.read(key: 'auth_token');
+    if (!widget.isUpdating) return; // Only fetch preferences when updating
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Lottie.asset(
+                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+              ),
+            ),
+          );
+        });
+    final response = await http.get(
+      Uri.parse('$api/api/auth/profile/'),
+      headers: {
+        'Authorization': 'Token $token',
+      },
+    );
+
+    if (response.statusCode.toString().startsWith("2")) {
+      Navigator.pop(context);
+      final data = json.decode(response.body);
+      setState(() {
+        likes =
+            (data['likes'] as List).map((like) => like['id'] as int).toList();
+        dislikes = (data['dislikes'] as List)
+            .map((dislike) => dislike['id'] as int)
+            .toList();
+      });
+    } else {
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+                title: "Error",
+                description: "Failed to fetch preferences",
+                perform: () {
+                  Navigator.pop(context);
+                },
+                buttonText: "Close");
+          });
     }
   }
 
@@ -93,40 +159,19 @@ class _PreferenceState extends State<Preference> {
         .where((category) => !likes.contains(category.id))
         .map((category) => category.id)
         .toList(); // Auto-fill dislikes with categories not liked
-
-    final response = await http.post(
-      Uri.parse('$api/api/auth/preferences/'),
-      headers: {
-        'Authorization': 'Token $token',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'likes': likes,
-        'dislikes': dislikes,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preferences saved successfully!')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to save preferences!')),
-      );
-    }
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder) {
-      return const HomePage();
-    }));
-  }
-
-  void updatePreferences() async {
-    final token = await secureStorage.read(key: 'auth_token');
-    dislikes = categories
-        .where((category) => !likes.contains(category.id))
-        .map((category) => category.id)
-        .toList(); // Update dislikes with unselected categories
-
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Lottie.asset(
+                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+              ),
+            ),
+          );
+        });
     final response = await http.post(
       Uri.parse('$api/api/auth/preferences/'),
       headers: {
@@ -140,17 +185,88 @@ class _PreferenceState extends State<Preference> {
     );
 
     if (response.statusCode.toString().startsWith("2")) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preferences updated successfully!')),
-      );
+      Navigator.pop(context);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder) {
+        return const HomePage();
+      }));
+      showDialog(
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+                title: "Success",
+                description: "Preferences added Succesfully",
+                perform: () {},
+                buttonText: "Close");
+          });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update preferences!')),
-      );
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+                title: "Error",
+                description: "Failed to add preferences",
+                perform: () {},
+                buttonText: "Close");
+          });
     }
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder) {
-      return const HomePage();
-    }));
+  }
+
+  void updatePreferences() async {
+    final token = await secureStorage.read(key: 'auth_token');
+    dislikes = categories
+        .where((category) => !likes.contains(category.id))
+        .map((category) => category.id)
+        .toList(); // Update dislikes with unselected categories
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Lottie.asset(
+                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+              ),
+            ),
+          );
+        });
+    final response = await http.post(
+      Uri.parse('$api/api/auth/preferences/'),
+      headers: {
+        'Authorization': 'Token $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'likes': likes,
+        'dislikes': dislikes,
+      }),
+    );
+
+    if (response.statusCode.toString().startsWith("2")) {
+      Navigator.pop(context);
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+                title: "Success",
+                description: "Preferences Updated Succesfully",
+                perform: () {},
+                buttonText: "Close");
+          });
+    } else {
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+                title: "Error",
+                description: "Failed to update preferences",
+                perform: () {},
+                buttonText: "Close");
+          });
+    }
   }
 
   @override
