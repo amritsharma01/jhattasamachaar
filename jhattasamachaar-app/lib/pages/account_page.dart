@@ -82,6 +82,13 @@ class _AccountPageState extends State<AccountPage> {
                     .toList() ??
                 [];
           });
+        } else if (response.statusCode == 401) {
+          showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) {
+                return const TokenNotFound();
+              });
         } else {
           showDialog(
               barrierDismissible: false,
@@ -90,14 +97,12 @@ class _AccountPageState extends State<AccountPage> {
                 return SampleDialog(
                     title: "Error",
                     description: "Failed to communicate with server",
-                    perform: () {
-                    
-                    },
+                    perform: () {},
                     buttonText: "Ok");
               });
         }
       } catch (e) {
-         String message =
+        String message =
             'An error occurred. Please check your internet connection.';
         if (e is SocketException) {
           message = 'No Internet Connection. Please try again later.';
@@ -108,9 +113,7 @@ class _AccountPageState extends State<AccountPage> {
             return SampleDialog(
               title: "Error",
               description: message,
-              perform: () {
-             
-              },
+              perform: () {},
               buttonText: "Ok",
             );
           },
@@ -353,9 +356,7 @@ class _AccountPageState extends State<AccountPage> {
                         return SampleDialog(
                           title: "Error",
                           description: message,
-                          perform: () {
-                          
-                          },
+                          perform: () {},
                           buttonText: "Ok",
                         );
                       },
@@ -401,19 +402,18 @@ class _AccountPageState extends State<AccountPage> {
             const SizedBox(height: 15),
             // Profile picture with shadow
             Center(
-              child: Container(
-                decoration: const BoxDecoration(),
-                child: Image.asset(
-                  photoUrl,
-                  fit: BoxFit.cover,
-                  height: 150,
-                  width: 150,
-                  errorBuilder: (context, error, stackTrace) => Image.asset(
-                    'lib/assets/images/user.png',
+              child: ClipOval(
+                child: Image.network(photoUrl, // The URL of the network image
+                    fit: BoxFit.cover,
+                    height: 150,
+                    width: 150, errorBuilder: (context, error, stackTrace) {
+                  // If the network image fails to load, show the local image
+                  return Image.asset(
+                    'lib/assets/images/user.png', // Local fallback image
                     height: 150,
                     width: 150,
-                  ),
-                ),
+                  );
+                }),
               ),
             ),
             const SizedBox(height: 15),

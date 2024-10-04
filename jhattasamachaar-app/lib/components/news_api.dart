@@ -16,18 +16,21 @@ class NewsService {
     final token = await secureStorage.read(key: 'auth_token');
     // Check for token presence
     if (token == null) {
-      if (context.mounted) {
-        // Ensure context is still valid before using it
-        showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return const TokenNotFound();
-          },
-        );
-      }
+      print("token error");
+      // Ensure context is still valid before using it
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return const TokenNotFound();
+        },
+      );
+
       return []; // Return an empty list if the token is not found
     } else {
+      print("yets hai");
+      print(token);
+      print("yeta");
       try {
         // Make the request
         final response = await http.get(

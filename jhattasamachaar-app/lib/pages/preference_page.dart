@@ -157,9 +157,9 @@ class _PreferenceState extends State<Preference> {
             likes = (data['likes'] as List)
                 .map((like) => like['id'] as int)
                 .toList();
-            dislikes = (data['dislikes'] as List)
-                .map((dislike) => dislike['id'] as int)
-                .toList();
+            // dislikes = (data['dislikes'] as List)
+            //     .map((dislike) => dislike['id'] as int)
+            //     .toList();
           });
         } else {
           Navigator.pop(context);
@@ -224,10 +224,10 @@ class _PreferenceState extends State<Preference> {
       return; // Exit the function if the token is not found
     }
 
-    dislikes = categories
-        .where((category) => !likes.contains(category.id))
-        .map((category) => category.id)
-        .toList(); // Auto-fill dislikes with categories not liked
+    // dislikes = categories
+    //     .where((category) => !likes.contains(category.id))
+    //     .map((category) => category.id)
+    //     .toList(); // Auto-fill dislikes with categories not liked
 
     showDialog(
       context: context,
@@ -330,10 +330,10 @@ class _PreferenceState extends State<Preference> {
       return; // Exit the function if the token is not found
     }
 
-    dislikes = categories
-        .where((category) => !likes.contains(category.id))
-        .map((category) => category.id)
-        .toList(); // Update dislikes with unselected categories
+    // dislikes = categories
+    //     .where((category) => !likes.contains(category.id))
+    //     .map((category) => category.id)
+    //     .toList(); // Update dislikes with unselected categories
 
     showDialog(
       context: context,
