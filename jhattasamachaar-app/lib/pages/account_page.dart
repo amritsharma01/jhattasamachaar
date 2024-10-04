@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -49,55 +50,76 @@ class _AccountPageState extends State<AccountPage> {
             return const TokenNotFound();
           });
     } else {
-      final response = await http.get(
-        Uri.parse('$api/api/auth/profile/'),
-        headers: {
-          'Authorization': 'Token $token',
-        },
-      );
+      try {
+        final response = await http.get(
+          Uri.parse('$api/api/auth/profile/'),
+          headers: {
+            'Authorization': 'Token $token',
+          },
+        );
 
-      if (response.statusCode.toString().startsWith("2")) {
-        final profileData = jsonDecode(response.body);
+        if (response.statusCode.toString().startsWith("2")) {
+          final profileData = jsonDecode(response.body);
+          setState(() {
+            name = profileData['user']['first_name'] +
+                    " " +
+                    profileData['user']['last_name'] ??
+                'User';
+            email = profileData['user']['email'] ?? 'user@user.com';
+            photoUrl = profileData['picture'] ?? 'lib/assets/images/user.png';
 
-        setState(() {
-          // Update the data extraction according to the new response structure
-          name = profileData['user']['first_name'] +
-                  " " +
-                  profileData['user']['last_name'] ??
-              'User';
-          email = profileData['user']['email'] ?? 'user@user.com';
-          photoUrl = profileData['picture'] ?? 'lib/assets/images/user.png';
+            likes = profileData['likes']
+                    ?.map((like) => {
+                          'name': like['name'],
+                        })
+                    .toList() ??
+                [];
 
-          // Extract likes and dislikes from the new response structure
-          likes = profileData['likes']
-                  ?.map((like) => {
-                        'name': like['name'],
-                      })
-                  .toList() ??
-              [];
-
-          dislikes = profileData['dislikes']
-                  ?.map((dislike) => {
-                        'name': dislike['name'],
-                      })
-                  .toList() ??
-              [];
-        });
-      } else {
+            dislikes = profileData['dislikes']
+                    ?.map((dislike) => {
+                          'name': dislike['name'],
+                        })
+                    .toList() ??
+                [];
+          });
+        } else {
+          showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) {
+                return SampleDialog(
+                    title: "Error",
+                    description: "Failed to communicate with server",
+                    perform: () {
+                    
+                    },
+                    buttonText: "Ok");
+              });
+        }
+      } catch (e) {
+         String message =
+            'An error occurred. Please check your internet connection.';
+        if (e is SocketException) {
+          message = 'No Internet Connection. Please try again later.';
+        }
         showDialog(
-            context: context,
-            builder: (context) {
-              return SampleDialog(
-                  title: "Error",
-                  description: "Failed to communicate with the server",
-                  perform: () {},
-                  buttonText: "Ok");
-            });
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+              title: "Error",
+              description: message,
+              perform: () {
+             
+              },
+              buttonText: "Ok",
+            );
+          },
+        );
       }
     }
   }
 
-  void showQr() {
+  void showQr() async {
     showDialog(
         context: context,
         builder: (context) {
@@ -106,18 +128,23 @@ class _AccountPageState extends State<AccountPage> {
               width: 100,
               height: 100,
               child: Lottie.asset(
-                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+                'lib/assets/animations/loading.json',
               ),
             ),
           );
         });
+
+    await Future.delayed(const Duration(seconds: 1)); // Small delay for UX
+
     final qrData = {
       'name': name,
       'email': email,
       'likes': likes,
       'dislikes': dislikes,
     };
-    Navigator.pop(context);
+
+    Navigator.pop(context); // Close loading animation
+
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -129,13 +156,12 @@ class _AccountPageState extends State<AccountPage> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           )),
           content: SizedBox(
-            // Provide a defined size for the QR code
             width: 250,
             height: 250,
             child: QrImageView(
-              data: jsonEncode(qrData), // QR data
-              version: QrVersions.auto, // Automatically adjust QR complexity
-              size: 200.0, // Size of the QR image inside the dialog
+              data: jsonEncode(qrData),
+              version: QrVersions.auto,
+              size: 200.0,
             ),
           ),
           actions: [
@@ -275,42 +301,67 @@ class _AccountPageState extends State<AccountPage> {
                       builder: (context) {
                         return const TokenNotFound();
                       });
-                }
-                else{
-                     final response = await http.post(
-                    Uri.parse('$api/api/auth/logout/'),
-                    headers: {
-                      'Authorization': 'Token $token',
-                      'Content-Type': 'application/json',
-                    },
-                  );
-                  
-                  if (response.statusCode.toString().startsWith("2")) {
-                    await FirebaseAuth.instance.signOut();
-                    await GoogleSignIn().signOut();
-                    Navigator.pop(context); // Close loading dialog
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(context,
+                } else {
+                  try {
+                    final response = await http.post(
+                      Uri.parse('$api/api/auth/logout/'),
+                      headers: {
+                        'Authorization': 'Token $token',
+                        'Content-Type': 'application/json',
+                      },
+                    );
+
+                    if (response.statusCode.toString().startsWith("2")) {
+                      await FirebaseAuth.instance.signOut();
+                      await GoogleSignIn().signOut();
+                      Navigator.pop(context); // Close loading dialog
+                      Navigator.pop(context);
+                      Navigator.pushAndRemoveUntil(
+                        context,
                         MaterialPageRoute(builder: (context) {
-                      return const Login();
-                    }));
-                  } else {
+                          return const Login();
+                        }),
+                        (Route<dynamic> route) {
+                          return false;
+                        },
+                      );
+                    } else {
+                      Navigator.pop(context); // Close loading dialog
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return SampleDialog(
+                                title: "Error",
+                                description: "Problem logging out, retry",
+                                perform: () {
+                                  Navigator.pop(context);
+                                },
+                                buttonText: "Ok");
+                          });
+                    }
+                  } catch (error) {
                     Navigator.pop(context); // Close loading dialog
+                    String message =
+                        'An error occurred. Please check your internet connection.';
+                    if (error is SocketException) {
+                      message =
+                          'No Internet Connection. Please try again later.';
+                    }
                     showDialog(
-                        context: context,
-                        builder: (context) {
-                          return SampleDialog(
-                              title: "Error",
-                              description: "Problem logging out, retry",
-                              perform: () {
-                                Navigator.pop(context);
-                              },
-                              buttonText: "Ok");
-                        });
+                      context: context,
+                      builder: (context) {
+                        return SampleDialog(
+                          title: "Error",
+                          description: message,
+                          perform: () {
+                          
+                          },
+                          buttonText: "Ok",
+                        );
+                      },
+                    );
                   }
                 }
-             
-
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade400,

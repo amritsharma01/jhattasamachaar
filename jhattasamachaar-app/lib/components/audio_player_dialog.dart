@@ -83,9 +83,9 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
       },
       child: Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(20),
         ),
-        backgroundColor: Colors.white,
+        elevation: 16,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -100,7 +100,7 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                           .resetPlayer(); // Reset player when close button is pressed
                       Navigator.pop(context);
                     },
-                    icon: const Icon(Icons.close, color: Colors.grey),
+                    icon: const Icon(Icons.close, color: Colors.blueAccent),
                   ),
                 ],
               ),
@@ -118,7 +118,11 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                 data: SliderThemeData(
                   trackHeight: 3,
                   thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 8),
+                      const RoundSliderThumbShape(enabledThumbRadius: 12),
+                  activeTrackColor: Colors.blueAccent,
+                  inactiveTrackColor: Colors.grey[300],
+                  thumbColor: Colors.blueAccent,
+                  overlayColor: Colors.blueAccent.withOpacity(0.3),
                 ),
                 child: Slider(
                   min: 0,
@@ -131,8 +135,6 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                       currentPosition = Duration(seconds: value.toInt());
                     });
                   },
-                  activeColor: Colors.blueAccent,
-                  inactiveColor: Colors.grey[300],
                 ),
               ),
               Padding(
@@ -142,16 +144,16 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                   children: [
                     Text(
                       formatTime(currentPosition),
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      style: const TextStyle(fontSize: 16, color: Colors.black),
                     ),
                     Text(
                       formatTime(totalDuration - currentPosition),
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      style: const TextStyle(fontSize: 16, color: Colors.black),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [

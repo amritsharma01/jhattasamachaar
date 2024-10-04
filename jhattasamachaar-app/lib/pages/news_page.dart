@@ -50,12 +50,14 @@ class _NewsPageState extends State<NewsPage> {
   Future<void> fetchNews() async {
     try {
       final fetchedNews = await newsService.fetchNews(context);
+      if (!context.mounted) return;
       setState(() {
         newsData = fetchedNews;
       });
     } catch (e) {
-      showDialog(
-        barrierDismissible: false,
+      if (context.mounted) {
+        showDialog(
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return SampleDialog(
@@ -64,7 +66,9 @@ class _NewsPageState extends State<NewsPage> {
               perform: () {},
               buttonText: "Ok",
             );
-          });
+          },
+        );
+      }
     }
   }
 
@@ -74,47 +78,79 @@ class _NewsPageState extends State<NewsPage> {
 
   Future<void> downloadMP3(String url) async {
     try {
-      Directory appDir = await getApplicationDocumentsDirectory();
+        Directory appDir = await getApplicationDocumentsDirectory();
       mp3FilePath = '${appDir.path}/news_audio.mp3';
 
       String? token = await getToken();
       if (token == null) {
-        showDialog(
+        if (context.mounted) {
+          showDialog(
             barrierDismissible: false,
             context: context,
             builder: (context) {
               return const TokenNotFound();
-            });
-      } else {
-        await dio.download(
-          url,
-          mp3FilePath!,
-          options: Options(
-            headers: {
-              'Authorization': 'Token $token',
             },
-          ),
-          onReceiveProgress: (received, total) {
-            if (total != -1) {
-              setState(() {
-                downloadProgress = received / total;
-              });
-            }
-          },
-        );
+          );
+        }
+      } else {
+        try {
+          await dio.download(
+            url,
+            mp3FilePath!,
+            options: Options(
+              headers: {
+                'Authorization': 'Token $token',
+              },
+            ),
+            onReceiveProgress: (received, total) {
+              if (total != -1) {
+                setState(() {
+                  downloadProgress = received / total;
+                });
+              }
+            },
+          );
 
-        setState(() {
-          isDownloading = false;
-          downloadProgress = 1.0; // Download complete
-        });
+          setState(() {
+            isDownloading = false;
+            downloadProgress = 1.0; // Download complete
+          });
+        } catch (e) {
+          String message =
+              'An error occurred. Please check your internet connection.';
+          if (e is SocketException) {
+            message = 'No Internet Connection. Please try again later.';
+          }
+          showDialog(
+            context: context,
+            builder: (context) {
+              return SampleDialog(
+                title: "Error",
+                description: message,
+                perform: () {
+                  Navigator.pop(context);
+                },
+                buttonText: "Ok",
+              );
+            },
+          );
+        }
       }
     } catch (e) {
       setState(() {
         isDownloading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to download audio: $e')),
-      );
+       if (context.mounted) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return SampleDialog(
+                  title: "Error",
+                  description: e.toString(),
+                  perform: () {},
+                  buttonText: "Ok");
+            });
+      }
     }
   }
 
@@ -124,6 +160,13 @@ class _NewsPageState extends State<NewsPage> {
     });
 
     await downloadMP3(mp3Url);
+
+    if (!isDownloading) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Download complete!')),
+      );
+    }
+
     showPlayerDialog();
   }
 
@@ -138,7 +181,10 @@ class _NewsPageState extends State<NewsPage> {
           resetPlayer: resetPlayer,
         );
       },
-    );
+    ).then((_) {
+      // Reset player when dialog is closed
+      resetPlayer();
+    });
   }
 
   void resetPlayer() {
@@ -215,10 +261,10 @@ class _NewsPageState extends State<NewsPage> {
           ),
           RefreshIndicator(
             onRefresh: refreshNews,
-            color: Colors.blue, // Progress color
-            backgroundColor: Colors.white, // Background color of the indicator
-            strokeWidth: 3.0, // Adjust thickness
-            displacement: 40, // Position of the refresh indicator
+            color: Colors.blue,
+            backgroundColor: Colors.white,
+            strokeWidth: 3.0,
+            displacement: 40,
             child: newsData == null
                 ? Center(
                     child: Lottie.asset(
@@ -227,10 +273,7 @@ class _NewsPageState extends State<NewsPage> {
                       height: 120,
                     ),
                   )
-                : // Import the news detail page
-
-// Inside your ListView.builder
-                ListView.builder(
+                : ListView.builder(
                     itemCount: newsData!.length,
                     itemBuilder: (context, index) {
                       var article = newsData![index];
@@ -238,12 +281,10 @@ class _NewsPageState extends State<NewsPage> {
                       String imgurl = article['og_image_url'] ?? "";
                       String description =
                           article['summary'] ?? 'No Description';
-                      String articleUrl = article['source_url'] ??
-                          ''; // Assuming you have the article URL
+                      String articleUrl = article['source_url'] ?? '';
 
                       return GestureDetector(
                         onTap: () {
-                          // Navigate to the NewsDetail page
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -252,12 +293,11 @@ class _NewsPageState extends State<NewsPage> {
                                 description: description,
                                 imageUrl: imgurl,
                                 articleUrl: articleUrl,
-                                publishedAt: article['published_at'] ??
-                                    'No Date', // New parameter
-                                category: article['category'] ??
-                                    'No Category', // New parameter
-                                sourceName: article['source_name'] ??
-                                    'No Source', // New parameter
+                                publishedAt:
+                                    article['published_at'] ?? 'No Date',
+                                category: article['category'] ?? 'No Category',
+                                sourceName:
+                                    article['source_name'] ?? 'No Source',
                               ),
                             ),
                           );

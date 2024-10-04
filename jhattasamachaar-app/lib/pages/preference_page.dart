@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -44,13 +45,12 @@ class _PreferenceState extends State<Preference> {
     final token = await secureStorage.read(key: 'auth_token');
     if (token == null) {
       showDialog(
-        barrierDismissible: false,
+          barrierDismissible: false,
           context: context,
           builder: (context) {
             return const TokenNotFound();
           });
-    }
-    else{
+    } else {
       showDialog(
           context: context,
           builder: (context) {
@@ -64,82 +64,139 @@ class _PreferenceState extends State<Preference> {
               ),
             );
           });
-      final response = await http.get(
-        Uri.parse('$api/api/news/category/'),
-        headers: {
-          'Authorization': 'Token $token',
-        },
-      );
+      try {
+        final response = await http.get(
+          Uri.parse('$api/api/news/category/'),
+          headers: {
+            'Authorization': 'Token $token',
+          },
+        );
 
-      if (response.statusCode.toString().startsWith("2")) {
-        Navigator.pop(context);
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => Category.fromJson(json)).toList();
-      } else {
-        Navigator.pop(context);
-        showDialog(
+        if (response.statusCode.toString().startsWith("2")) {
+          Navigator.pop(context);
+          final List<dynamic> data = json.decode(response.body);
+          return data.map((json) => Category.fromJson(json)).toList();
+        } else {
+          Navigator.pop(context);
+          showDialog(
             context: context,
             builder: (context) {
               return SampleDialog(
-                  title: "Error",
-                  description: "Failed to load categories",
-                  perform: () {
-                    Navigator.pop(context);
-                  },
-                  buttonText: "Close");
-            });
-     
+                title: "Error",
+                description: "Failed to load categories",
+                perform: () {
+                  Navigator.pop(context);
+                },
+                buttonText: "Close",
+              );
+            },
+          );
+          return [];
+        }
+      } catch (error) {
+        Navigator.pop(context); // Close loading dialog
+        String message =
+            'An error occurred. Please check your internet connection.';
+        if (error is SocketException) {
+          message = 'No Internet Connection. Please try again later.';
+        }
+        showDialog(
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+              title: "Error",
+              description: message,
+              perform: () {
+                Navigator.pop(context);
+              },
+              buttonText: "Ok",
+            );
+          },
+        );
+        return []; // Return an empty list on error
       }
     }
-     throw Exception("Error");
+    return [];
   }
 
   Future<void> fetchUserPreferences() async {
     final token = await secureStorage.read(key: 'auth_token');
     if (!widget.isUpdating) return; // Only fetch preferences when updating
-    showDialog(
-        context: context,
-        builder: (context) {
-          return Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: Lottie.asset(
-                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
-              ),
-            ),
-          );
-        });
-    final response = await http.get(
-      Uri.parse('$api/api/auth/profile/'),
-      headers: {
-        'Authorization': 'Token $token',
-      },
-    );
-
-    if (response.statusCode.toString().startsWith("2")) {
-      Navigator.pop(context);
-      final data = json.decode(response.body);
-      setState(() {
-        likes =
-            (data['likes'] as List).map((like) => like['id'] as int).toList();
-        dislikes = (data['dislikes'] as List)
-            .map((dislike) => dislike['id'] as int)
-            .toList();
-      });
-    } else {
-      Navigator.pop(context);
+    if (token == null) {
       showDialog(
           context: context,
           builder: (context) {
-            return SampleDialog(
-                title: "Error",
-                description: "Failed to fetch preferences",
-                perform: () {
-                  Navigator.pop(context);
-                },
-                buttonText: "Close");
+            return const TokenNotFound();
           });
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Lottie.asset(
+                  'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+                ),
+              ),
+            );
+          });
+      try {
+        final response = await http.get(
+          Uri.parse('$api/api/auth/profile/'),
+          headers: {
+            'Authorization': 'Token $token',
+          },
+        );
+
+        if (response.statusCode.toString().startsWith("2")) {
+          Navigator.pop(context);
+          final data = json.decode(response.body);
+          setState(() {
+            likes = (data['likes'] as List)
+                .map((like) => like['id'] as int)
+                .toList();
+            dislikes = (data['dislikes'] as List)
+                .map((dislike) => dislike['id'] as int)
+                .toList();
+          });
+        } else {
+          Navigator.pop(context);
+          showDialog(
+              context: context,
+              builder: (context) {
+                return SampleDialog(
+                    title: "Error",
+                    description: "Failed to fetch preferences",
+                    perform: () {
+                      Navigator.pop(context);
+                    },
+                    buttonText: "Close");
+              });
+        }
+      } catch (error) {
+        Navigator.pop(context); // Close loading dialog
+        String message =
+            'An error occurred. Please check your internet connection.';
+        if (error is SocketException) {
+          message = 'No Internet Connection. Please try again later.';
+        }
+        showDialog(
+          context: context,
+          builder: (context) {
+            return SampleDialog(
+              title: "Error",
+              description: message,
+              perform: () {
+                Navigator.pop(context);
+              },
+              buttonText: "Ok",
+            );
+          },
+        );
+        // Return an empty list on error
+      }
     }
   }
 
@@ -155,117 +212,205 @@ class _PreferenceState extends State<Preference> {
 
   void addPreferences() async {
     final token = await secureStorage.read(key: 'auth_token');
+
+    // Check if the token is null
+    if (token == null) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return const TokenNotFound();
+        },
+      );
+      return; // Exit the function if the token is not found
+    }
+
     dislikes = categories
         .where((category) => !likes.contains(category.id))
         .map((category) => category.id)
         .toList(); // Auto-fill dislikes with categories not liked
+
     showDialog(
-        context: context,
-        builder: (context) {
-          return Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: Lottie.asset(
-                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
-              ),
+      context: context,
+      builder: (context) {
+        return Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Lottie.asset(
+              'lib/assets/animations/loading.json',
             ),
-          );
-        });
-    final response = await http.post(
-      Uri.parse('$api/api/auth/preferences/'),
-      headers: {
-        'Authorization': 'Token $token',
-        'Content-Type': 'application/json',
+          ),
+        );
       },
-      body: json.encode({
-        'likes': likes,
-        'dislikes': dislikes,
-      }),
     );
 
-    if (response.statusCode.toString().startsWith("2")) {
-      Navigator.pop(context);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder) {
-        return const HomePage();
-      }));
-      showDialog(
+    try {
+      final response = await http.post(
+        Uri.parse('$api/api/auth/preferences/'),
+        headers: {
+          'Authorization': 'Token $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'likes': likes,
+          'dislikes': dislikes,
+        }),
+      );
+
+      if (response.statusCode.toString().startsWith("2")) {
+        Navigator.pop(context);
+         Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) {
+            return const HomePage();
+          }),
+          (Route<dynamic> route) {
+            return false;
+          },
+        );
+        showDialog(
           context: context,
           builder: (context) {
             return SampleDialog(
-                title: "Success",
-                description: "Preferences added Succesfully",
-                perform: () {},
-                buttonText: "Close");
-          });
-    } else {
-      Navigator.pop(context);
-      showDialog(
+              title: "Success",
+              description: "Preferences added Successfully",
+              perform: () {},
+              buttonText: "Close",
+            );
+          },
+        );
+      } else {
+        Navigator.pop(context);
+        showDialog(
           context: context,
           builder: (context) {
             return SampleDialog(
-                title: "Error",
-                description: "Failed to add preferences",
-                perform: () {},
-                buttonText: "Close");
-          });
+              title: "Error",
+              description: "Failed to add preferences",
+              perform: () {},
+              buttonText: "Close",
+            );
+          },
+        );
+      }
+    } catch (error) {
+      Navigator.pop(context); // Close loading dialog
+      String message =
+          'An error occurred. Please check your internet connection.';
+      if (error is SocketException) {
+        message = 'No Internet Connection. Please try again later.';
+      }
+      showDialog(
+        context: context,
+        builder: (context) {
+          return SampleDialog(
+            title: "Error",
+            description: message,
+            perform: () {
+              Navigator.pop(context);
+            },
+            buttonText: "Ok",
+          );
+        },
+      );
     }
   }
 
   void updatePreferences() async {
     final token = await secureStorage.read(key: 'auth_token');
+
+    // Check if the token is null
+    if (token == null) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return const TokenNotFound();
+        },
+      );
+      return; // Exit the function if the token is not found
+    }
+
     dislikes = categories
         .where((category) => !likes.contains(category.id))
         .map((category) => category.id)
         .toList(); // Update dislikes with unselected categories
+
     showDialog(
-        context: context,
-        builder: (context) {
-          return Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: Lottie.asset(
-                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
-              ),
+      context: context,
+      builder: (context) {
+        return Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Lottie.asset(
+              'lib/assets/animations/loading.json',
             ),
-          );
-        });
-    final response = await http.post(
-      Uri.parse('$api/api/auth/preferences/'),
-      headers: {
-        'Authorization': 'Token $token',
-        'Content-Type': 'application/json',
+          ),
+        );
       },
-      body: json.encode({
-        'likes': likes,
-        'dislikes': dislikes,
-      }),
     );
 
-    if (response.statusCode.toString().startsWith("2")) {
-      Navigator.pop(context);
-      Navigator.pop(context);
-      showDialog(
+    try {
+      final response = await http.post(
+        Uri.parse('$api/api/auth/preferences/'),
+        headers: {
+          'Authorization': 'Token $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'likes': likes,
+          'dislikes': dislikes,
+        }),
+      );
+
+      if (response.statusCode.toString().startsWith("2")) {
+        Navigator.pop(context);
+        Navigator.pop(context);
+        showDialog(
           context: context,
           builder: (context) {
             return SampleDialog(
-                title: "Success",
-                description: "Preferences Updated Succesfully",
-                perform: () {},
-                buttonText: "Close");
-          });
-    } else {
-      Navigator.pop(context);
-      showDialog(
+              title: "Success",
+              description: "Preferences Updated Successfully",
+              perform: () {},
+              buttonText: "Close",
+            );
+          },
+        );
+      } else {
+        Navigator.pop(context);
+        showDialog(
           context: context,
           builder: (context) {
             return SampleDialog(
-                title: "Error",
-                description: "Failed to update preferences",
-                perform: () {},
-                buttonText: "Close");
-          });
+              title: "Error",
+              description: "Failed to update preferences",
+              perform: () {},
+              buttonText: "Close",
+            );
+          },
+        );
+      }
+    } catch (error) {
+      Navigator.pop(context); // Close loading dialog
+      String message =
+          'An error occurred. Please check your internet connection.';
+      if (error is SocketException) {
+        message = 'No Internet Connection. Please try again later.';
+      }
+      showDialog(
+        context: context,
+        builder: (context) {
+          return SampleDialog(
+            title: "Error",
+            description: message,
+            perform: () {
+              Navigator.pop(context);
+            },
+            buttonText: "Ok",
+          );
+        },
+      );
     }
   }
 
@@ -278,10 +423,15 @@ class _PreferenceState extends State<Preference> {
           !widget.isUpdating
               ? GestureDetector(
                   onTap: () {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (builder) {
-                      return const HomePage();
-                    }));
+                      Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return const HomePage();
+                      }),
+                      (Route<dynamic> route) {
+                        return false;
+                      },
+                    );
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(right: 20),

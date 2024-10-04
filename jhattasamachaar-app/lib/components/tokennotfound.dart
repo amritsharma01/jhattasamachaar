@@ -13,8 +13,14 @@ class TokenNotFound extends StatelessWidget {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop(); // Close the dialog
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const Login()),
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return const Login();
+              }),
+              (Route<dynamic> route) {
+                return false;
+              },
             );
           },
           child: const Text('Login'),
