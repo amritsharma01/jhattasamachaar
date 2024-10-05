@@ -83,23 +83,28 @@ class _AccountPageState extends State<AccountPage> {
                 [];
           });
         } else if (response.statusCode == 401) {
-          showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (context) {
-                return const TokenNotFound();
-              });
+          secureStorage.delete(key: "auth_token");
+        if(context.mounted){
+            showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) {
+                  return const TokenNotFound();
+                });
+        }
         } else {
-          showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (context) {
-                return SampleDialog(
-                    title: "Error",
-                    description: "Failed to communicate with server",
-                    perform: () {},
-                    buttonText: "Ok");
-              });
+         if(context.mounted){
+           showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) {
+                  return SampleDialog(
+                      title: "Error",
+                      description: "Failed to communicate with server",
+                      perform: () {},
+                      buttonText: "Ok");
+                });
+         }
         }
       } catch (e) {
         String message =
@@ -107,35 +112,41 @@ class _AccountPageState extends State<AccountPage> {
         if (e is SocketException) {
           message = 'No Internet Connection. Please try again later.';
         }
-        showDialog(
-          context: context,
-          builder: (context) {
-            return SampleDialog(
-              title: "Error",
-              description: message,
-              perform: () {},
-              buttonText: "Ok",
-            );
-          },
-        );
+      
+        if(context.mounted){
+           showDialog(
+            context: context,
+            builder: (context) {
+              return SampleDialog(
+                title: "Error",
+                description: message,
+                perform: () {},
+                buttonText: "Ok",
+              );
+            },
+          );
+        }
+       }
       }
-    }
+    
   }
 
   void showQr() async {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: Lottie.asset(
-                'lib/assets/animations/loading.json',
+   if(context.mounted){
+     showDialog(
+          context: context,
+          builder: (context) {
+            return Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Lottie.asset(
+                  'lib/assets/animations/loading.json',
+                ),
               ),
-            ),
-          );
-        });
+            );
+          });
+   }
 
     await Future.delayed(const Duration(seconds: 1)); // Small delay for UX
 
@@ -148,244 +159,250 @@ class _AccountPageState extends State<AccountPage> {
 
     Navigator.pop(context); // Close loading animation
 
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Center(
-              child: Text(
-            "QR Code",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          )),
-          content: SizedBox(
-            width: 250,
-            height: 250,
-            child: QrImageView(
-              data: jsonEncode(qrData),
-              version: QrVersions.auto,
-              size: 200.0,
+   if(context.mounted){
+     showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Center(
+                child: Text(
+              "QR Code",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            )),
+            content: SizedBox(
+              width: 250,
+              height: 250,
+              child: QrImageView(
+                data: jsonEncode(qrData),
+                version: QrVersions.auto,
+                size: 200.0,
+              ),
             ),
-          ),
-          actions: [
-            GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 25.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blue.shade300,
-                            Colors.blue.shade700,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )),
-                    child: const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                      child: Text(
-                        "Close",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold),
+            actions: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 25.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.blue.shade300,
+                              Colors.blue.shade700,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )),
+                      child: const Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                        child: Text(
+                          "Close",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
-    );
+            ],
+          );
+        },
+      );
+   }
   }
 
   void rateUs() async {
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) {
-          return Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: Lottie.asset(
-                'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+   if(context.mounted){
+     showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) {
+            return Center(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: Lottie.asset(
+                  'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+                ),
               ),
-            ),
-          );
-        });
+            );
+          });
+   }
     await LaunchReview.launch(androidAppId: "com.example.app", iOSAppId: "");
     Navigator.pop(context);
   }
 
   void signOut() {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) {
-        return AlertDialog.adaptive(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            "Log Out",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Colors.black87,
+   if(context.mounted){
+     showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog.adaptive(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-          content: const Text(
-            "Are you sure you want to log out?",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black54,
-            ),
-          ),
-          actions: [
-            // No Button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey
-                    .shade400, // Use a grey background to differentiate from "Yes"
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+            title: const Text(
+              "Log Out",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.black87,
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                child: Text(
-                  "No",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.white, // White text for contrast
+            ),
+            content: const Text(
+              "Are you sure you want to log out?",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+            ),
+            actions: [
+              // No Button
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey
+                      .shade400, // Use a grey background to differentiate from "Yes"
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: Text(
+                    "No",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white, // White text for contrast
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Yes Button
-            ElevatedButton(
-              onPressed: () async {
-                // Show loading animation
-                showDialog(
-                  barrierColor: Colors.black54,
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) {
-                    return Center(
-                      child: SizedBox(
-                        height: 100,
-                        child:
-                            Lottie.asset("lib/assets/animations/loading.json"),
-                      ),
-                    );
-                  },
-                );
-
-                const FlutterSecureStorage secureStorage =
-                    FlutterSecureStorage();
-                String? token = await secureStorage.read(key: 'auth_token');
-                if (token == null) {
+              // Yes Button
+              ElevatedButton(
+                onPressed: () async {
+                  // Show loading animation
                   showDialog(
-                      context: context,
-                      builder: (context) {
-                        return const TokenNotFound();
-                      });
-                } else {
-                  try {
-                    final response = await http.post(
-                      Uri.parse('$api/api/auth/logout/'),
-                      headers: {
-                        'Authorization': 'Token $token',
-                        'Content-Type': 'application/json',
-                      },
-                    );
+                    barrierColor: Colors.black54,
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return Center(
+                        child: SizedBox(
+                          height: 100,
+                          child: Lottie.asset(
+                              "lib/assets/animations/loading.json"),
+                        ),
+                      );
+                    },
+                  );
 
-                    if (response.statusCode.toString().startsWith("2")) {
-                      await FirebaseAuth.instance.signOut();
-                      await GoogleSignIn().signOut();
-                      Navigator.pop(context); // Close loading dialog
-                      Navigator.pop(context);
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          return const Login();
-                        }),
-                        (Route<dynamic> route) {
-                          return false;
+                  const FlutterSecureStorage secureStorage =
+                      FlutterSecureStorage();
+                  String? token = await secureStorage.read(key: 'auth_token');
+                  if (token == null) {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return const TokenNotFound();
+                        });
+                  } else {
+                    try {
+                      final response = await http.post(
+                        Uri.parse('$api/api/auth/logout/'),
+                        headers: {
+                          'Authorization': 'Token $token',
+                          'Content-Type': 'application/json',
                         },
                       );
-                    } else {
-                      Navigator.pop(context); // Close loading dialog
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return SampleDialog(
-                                title: "Error",
-                                description: "Problem logging out, retry",
-                                perform: () {
-                                  Navigator.pop(context);
-                                },
-                                buttonText: "Ok");
-                          });
-                    }
-                  } catch (error) {
-                    Navigator.pop(context); // Close loading dialog
-                    String message =
-                        'An error occurred. Please check your internet connection.';
-                    if (error is SocketException) {
-                      message =
-                          'No Internet Connection. Please try again later.';
-                    }
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return SampleDialog(
-                          title: "Error",
-                          description: message,
-                          perform: () {},
-                          buttonText: "Ok",
+
+                      if (response.statusCode.toString().startsWith("2")) {
+                        await FirebaseAuth.instance.signOut();
+                        await GoogleSignIn().signOut();
+                        Navigator.pop(context); // Close loading dialog
+                        Navigator.pop(context);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) {
+                            return const Login();
+                          }),
+                          (Route<dynamic> route) {
+                            return false;
+                          },
                         );
-                      },
-                    );
+                      } else {
+                        Navigator.pop(context); // Close loading dialog
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return SampleDialog(
+                                  title: "Error",
+                                  description: "Problem logging out, retry",
+                                  perform: () {
+                                    Navigator.pop(context);
+                                  },
+                                  buttonText: "Ok");
+                            });
+                      }
+                    } catch (error) {
+                      Navigator.pop(context); // Close loading dialog
+                      String message =
+                          'An error occurred. Please check your internet connection.';
+                      if (error is SocketException) {
+                        message =
+                            'No Internet Connection. Please try again later.';
+                      }
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return SampleDialog(
+                            title: "Error",
+                            description: message,
+                            perform: () {},
+                            buttonText: "Ok",
+                          );
+                        },
+                      );
+                    }
                   }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade400,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade400,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                child: Text(
-                  "Yes",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.white,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: Text(
+                    "Yes",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
-    );
+            ],
+          );
+        },
+      );
+   }
   }
 
   @override

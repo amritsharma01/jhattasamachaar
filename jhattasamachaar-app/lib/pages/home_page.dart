@@ -35,8 +35,8 @@ class _HomePageState extends State<HomePage> {
         animationDuration: const Duration(milliseconds: 600),
         backgroundColor: Colors.transparent, // Keep the background transparent
         color: Colors.grey.shade300, // Light grey for a soft background
-        buttonBackgroundColor: Colors
-            .blue.shade600, // Slightly darker green for the active button
+        buttonBackgroundColor:
+            Colors.blue.shade600, // Slightly darker green for the active button
         letIndexChange: (index) => true,
         items: [
           Icon(

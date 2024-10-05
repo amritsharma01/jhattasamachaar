@@ -3,6 +3,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:jhattasamachaar/components/everything_caught_up.dart';
 import 'package:jhattasamachaar/components/news_api.dart';
 import 'package:jhattasamachaar/components/audio_player_dialog.dart';
 import 'package:jhattasamachaar/components/sample_dialog.dart';
@@ -26,17 +28,22 @@ class _NewsPageState extends State<NewsPage> {
   final Dio dio = Dio();
   final AudioPlayer audioPlayer = AudioPlayer();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-
+  final ScrollController scrollController = ScrollController();
   String? mp3FilePath;
+  String? nextUrl;
   bool isDownloading = false;
+  bool isLoadingMore = false;
   double downloadProgress = 0.0;
   List<dynamic>? newsData;
   final String api = Globals.link;
+  bool clickableFab = true;
+  bool isFabVisible = true;
 
   late String mp3Url = '$api/api/news/mp3/';
 
   @override
   void dispose() {
+    scrollController.dispose();
     audioPlayer.dispose();
     super.dispose();
   }
@@ -45,6 +52,22 @@ class _NewsPageState extends State<NewsPage> {
   void initState() {
     super.initState();
     fetchNews();
+    scrollController.addListener(onScroll);
+  }
+
+  void onScroll() {
+    if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent &&
+        !isLoadingMore) {
+      loadMoreNews();
+      setState(() {
+        isFabVisible = false;
+      });
+    } else {
+      setState(() {
+        isFabVisible = true;
+      });
+    }
   }
 
   Future<void> fetchNews() async {
@@ -52,7 +75,8 @@ class _NewsPageState extends State<NewsPage> {
       final fetchedNews = await newsService.fetchNews(context);
       if (!context.mounted) return;
       setState(() {
-        newsData = fetchedNews;
+        newsData = fetchedNews[0];
+        nextUrl = fetchedNews[1];
       });
     } catch (e) {
       if (context.mounted) {
@@ -72,13 +96,36 @@ class _NewsPageState extends State<NewsPage> {
     }
   }
 
+  Future<void> loadMoreNews() async {
+    setState(() {
+      isLoadingMore = true; // Show loading indicator
+    });
+
+    try {
+      final moreNews = await newsService.fetchMoreNews(context);
+      if (moreNews[0] != null) {
+        setState(() {
+          isLoadingMore = false;
+        });
+      } else {
+        setState(() {
+          isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoadingMore = false;
+      });
+    }
+  }
+
   Future<String?> getToken() async {
     return await secureStorage.read(key: 'auth_token');
   }
 
   Future<void> downloadMP3(String url) async {
     try {
-        Directory appDir = await getApplicationDocumentsDirectory();
+      Directory appDir = await getApplicationDocumentsDirectory();
       mp3FilePath = '${appDir.path}/news_audio.mp3';
 
       String? token = await getToken();
@@ -121,26 +168,26 @@ class _NewsPageState extends State<NewsPage> {
           if (e is SocketException) {
             message = 'No Internet Connection. Please try again later.';
           }
-          showDialog(
-            context: context,
-            builder: (context) {
-              return SampleDialog(
-                title: "Error",
-                description: message,
-                perform: () {
-                  Navigator.pop(context);
-                },
-                buttonText: "Ok",
-              );
-            },
-          );
+          if (context.mounted) {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return SampleDialog(
+                  title: "Error",
+                  description: message,
+                  perform: () {},
+                  buttonText: "Ok",
+                );
+              },
+            );
+          }
         }
       }
     } catch (e) {
       setState(() {
         isDownloading = false;
       });
-       if (context.mounted) {
+      if (context.mounted) {
         showDialog(
             context: context,
             builder: (context) {
@@ -157,6 +204,7 @@ class _NewsPageState extends State<NewsPage> {
   Future<void> downloadAndShowPlayer() async {
     setState(() {
       isDownloading = true;
+      clickableFab = false;
     });
 
     await downloadMP3(mp3Url);
@@ -171,58 +219,74 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   void showPlayerDialog() {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return AudioPlayerDialog(
-          audioPlayer: audioPlayer,
-          mp3FilePath: mp3FilePath,
-          resetPlayer: resetPlayer,
-        );
-      },
-    ).then((_) {
-      // Reset player when dialog is closed
-      resetPlayer();
-    });
+    if (context.mounted) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return AudioPlayerDialog(
+            audioPlayer: audioPlayer,
+            mp3FilePath: mp3FilePath,
+            resetPlayer: resetPlayer,
+          );
+        },
+      ).then((_) {
+        // Reset player when dialog is closed
+        resetPlayer();
+      });
+    }
   }
 
   void resetPlayer() {
     audioPlayer.stop();
     setState(() {
       downloadProgress = 0.0;
+      clickableFab = true;
     });
-  }
-
-  Future<void> refreshNews() async {
-    await fetchNews();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.blue.shade600,
-        onPressed: downloadAndShowPlayer,
-        label: isDownloading
-            ? SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  value: downloadProgress,
-                  backgroundColor: Colors.white,
-                ),
-              )
-            : const Text(
-                "Bulletin",
-                style: TextStyle(fontSize: 17, color: Colors.white),
+      floatingActionButton: isFabVisible
+          ? FloatingActionButton.extended(
+              backgroundColor: Colors.blue, // Make background transparent
+              onPressed: clickableFab ? downloadAndShowPlayer : () {},
+              label: isDownloading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Background Circle
+                          CircularProgressIndicator(
+                            value: null, // Indeterminate progress
+                            strokeWidth: 4,
+                            backgroundColor: Colors.white
+                                .withOpacity(0.5), // Light background
+                          ),
+                          // Foreground Circle
+                          CircularProgressIndicator(
+                            value: downloadProgress, // Determinate progress
+                            strokeWidth: 4,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.black), // Change color if needed
+                          ),
+                        ],
+                      ),
+                    )
+                  : const Text(
+                      "Bulletin",
+                      style: TextStyle(fontSize: 17, color: Colors.white),
+                    ),
+              icon: const Icon(
+                Icons.speaker_phone,
+                size: 30,
+                color: Colors.white,
               ),
-        icon: const Icon(
-          Icons.speaker_phone,
-          size: 30,
-          color: Colors.white,
-        ),
-      ),
+            )
+          : null,
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         elevation: 0,
@@ -260,7 +324,7 @@ class _NewsPageState extends State<NewsPage> {
             ),
           ),
           RefreshIndicator(
-            onRefresh: refreshNews,
+            onRefresh: fetchNews,
             color: Colors.blue,
             backgroundColor: Colors.white,
             strokeWidth: 3.0,
@@ -274,8 +338,23 @@ class _NewsPageState extends State<NewsPage> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: newsData!.length,
+                    controller: scrollController,
+                    itemCount: newsData!.length + 1,
                     itemBuilder: (context, index) {
+                      if (index == newsData!.length) {
+                        return isLoadingMore
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 24.0),
+                                child: Center(
+                                  child: Lottie.asset(
+                                    "lib/assets/animations/loading.json",
+                                    width: 50,
+                                    height: 50,
+                                  ),
+                                ))
+                            : const EverythingCaughtUpMessage();
+                      }
                       var article = newsData![index];
                       String title = article['title'] ?? 'No Title';
                       String imgurl = article['og_image_url'] ?? "";
