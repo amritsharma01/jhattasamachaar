@@ -249,41 +249,55 @@ class _NewsPageState extends State<NewsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: isFabVisible
-          ? FloatingActionButton.extended(
-              backgroundColor: Colors.blue, // Make background transparent
-              onPressed: clickableFab ? downloadAndShowPlayer : () {},
-              label: isDownloading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Background Circle
-                          CircularProgressIndicator(
-                            value: null, // Indeterminate progress
-                            strokeWidth: 4,
-                            backgroundColor: Colors.white
-                                .withOpacity(0.5), // Light background
-                          ),
-                          // Foreground Circle
-                          CircularProgressIndicator(
-                            value: downloadProgress, // Determinate progress
-                            strokeWidth: 4,
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.black), // Change color if needed
-                          ),
-                        ],
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: const LinearGradient(
+                  colors: [
+                    Colors.lightBlue,
+                    Color(0xFF2c69d1), // #0083b0
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: FloatingActionButton.extended(
+                backgroundColor:
+                    Colors.transparent, // Make background transparent
+                onPressed: clickableFab ? downloadAndShowPlayer : () {},
+                label: isDownloading
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: null, // Indeterminate progress
+                              strokeWidth: 5,
+                              color: Colors.black,
+                              backgroundColor: Colors.white
+                                  .withOpacity(0.5), // Light background
+                            ),
+                            // Foreground Circle
+                            CircularProgressIndicator(
+                              value: downloadProgress, // Determinate progress
+                              strokeWidth: 5,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.white), // Change color if needed
+                            ),
+                          ],
+                        ),
+                      )
+                    : const Text(
+                        "Bulletin",
+                        style: TextStyle(fontSize: 17, color: Colors.white),
                       ),
-                    )
-                  : const Text(
-                      "Bulletin",
-                      style: TextStyle(fontSize: 17, color: Colors.white),
-                    ),
-              icon: const Icon(
-                Icons.speaker_phone,
-                size: 30,
-                color: Colors.white,
+                icon: const Icon(
+                  Icons.speaker_phone,
+                  size: 30,
+                  color: Colors.white,
+                ),
               ),
             )
           : null,

@@ -80,14 +80,14 @@ class _LoginState extends State<Login> {
       if (isNew) {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-          return Preference(
+          return const Preference(
             isUpdating: false,
           );
         }));
       } else {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-          return  HomePage();
+          return const HomePage();
         }));
       }
       return null;
@@ -218,43 +218,124 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[400],
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 15),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Container(height: 1, color: Colors.grey[600])),
-                    const SizedBox(width: 2),
-                    const Text("Continue with"),
-                    const SizedBox(width: 2),
-                    Expanded(
-                        child: Container(height: 1, color: Colors.grey[600])),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
-              GestureDetector(
-                onTap: signInWithGoogle,
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white24),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.grey.shade300,
-                  ),
-                  child:
-                      Image.asset("lib/assets/images/google.png", height: 30),
-                ),
-              ),
-              const SizedBox(height: 10),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0abcf9), // #00b4db
+              Color(0xFF2c69d1), // #0083b0
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Logo and Text Section
+                const SizedBox(height: 80), // Space at the top
+                SizedBox(
+                  height: 150, // Logo height
+                  child: Center(
+                    child: Image.asset("lib/assets/logo/logo.png"),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                const Text(
+                  "Hello",
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 10.0,
+                        color: Colors.black38,
+                        offset: Offset(3.0, 3.0),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Get the Latest News Summaries",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                // Custom Divider with soft edges
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Container(
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: Colors.white70,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 3,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 150), // Pushes the button lower
+
+                // Sign-in Button Section
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: GestureDetector(
+                    onTap: signInWithGoogle,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white24),
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            spreadRadius: 5,
+                            blurRadius: 15,
+                            offset: const Offset(
+                                0, 5), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            "lib/assets/images/google.png",
+                            height: 30,
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            "Sign in with Google",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 50), // Space at the bottom
+              ],
+            ),
           ),
         ),
       ),
