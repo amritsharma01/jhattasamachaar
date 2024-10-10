@@ -11,10 +11,12 @@ import 'package:jhattasamachaar/components/sample_dialog.dart';
 import 'package:jhattasamachaar/components/tokennotfound.dart';
 import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:jhattasamachaar/pages/news_detail.dart';
+import 'package:jhattasamachaar/theme/theme_provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -252,12 +254,16 @@ class _NewsPageState extends State<NewsPage> {
           ? Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   colors: [
-                    Colors.lightBlue,
-                    Color(0xFF2c69d1), // #0083b0
+                    Theme.of(context)
+                        .floatingActionButtonTheme
+                        .foregroundColor!,
+                    Theme.of(context)
+                        .floatingActionButtonTheme
+                        .backgroundColor!,
                   ],
-                  begin: Alignment.bottomCenter,
+                  begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
               ),
@@ -267,27 +273,10 @@ class _NewsPageState extends State<NewsPage> {
                 onPressed: clickableFab ? downloadAndShowPlayer : () {},
                 label: isDownloading
                     ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CircularProgressIndicator(
-                              value: null, // Indeterminate progress
-                              strokeWidth: 5,
-                              color: Colors.black,
-                              backgroundColor: Colors.white
-                                  .withOpacity(0.5), // Light background
-                            ),
-                            // Foreground Circle
-                            CircularProgressIndicator(
-                              value: downloadProgress, // Determinate progress
-                              strokeWidth: 5,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Colors.white), // Change color if needed
-                            ),
-                          ],
-                        ),
+                        width: 55,
+                        height: 55,
+                        child: Lottie.asset(
+                            "lib/assets/animations/loading_white.json"),
                       )
                     : const Text(
                         "Bulletin",
@@ -301,28 +290,38 @@ class _NewsPageState extends State<NewsPage> {
               ),
             )
           : null,
-      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.deepPurple],
+              colors: [
+                Theme.of(context).appBarTheme.foregroundColor!,
+                Theme.of(context).appBarTheme.backgroundColor!,
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
-        title: const Text(
+        title: Text(
           "Latest News Today!",
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Theme.of(context).appBarTheme.titleTextStyle!.color!,
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+              onPressed: () {
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .toggleTheme();
+              },
+              icon: const Icon(Icons.dark_mode_rounded))
+        ],
       ),
       body: Stack(
         children: [
@@ -330,7 +329,10 @@ class _NewsPageState extends State<NewsPage> {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.white, Colors.grey.shade100],
+                  colors: [
+                    Theme.of(context).scaffoldBackgroundColor,
+                    Theme.of(context).colorScheme.surface,
+                  ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -363,8 +365,8 @@ class _NewsPageState extends State<NewsPage> {
                                 child: Center(
                                   child: Lottie.asset(
                                     "lib/assets/animations/loading.json",
-                                    width: 50,
-                                    height: 50,
+                                    width: 70,
+                                    height: 70,
                                   ),
                                 ))
                             : const EverythingCaughtUpMessage();
@@ -399,6 +401,7 @@ class _NewsPageState extends State<NewsPage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10.0, vertical: 6.0),
                           child: Card(
+                            color: Theme.of(context).cardColor,
                             elevation: 3,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
@@ -442,9 +445,11 @@ class _NewsPageState extends State<NewsPage> {
                                       const SizedBox(height: 8),
                                       Text(
                                         description,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 15,
-                                          color: Colors.black87,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .tertiary,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,

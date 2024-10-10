@@ -84,17 +84,17 @@ class _AccountPageState extends State<AccountPage> {
           });
         } else if (response.statusCode == 401) {
           secureStorage.delete(key: "auth_token");
-        if(context.mounted){
+          if (context.mounted) {
             showDialog(
                 barrierDismissible: false,
                 context: context,
                 builder: (context) {
                   return const TokenNotFound();
                 });
-        }
+          }
         } else {
-         if(context.mounted){
-           showDialog(
+          if (context.mounted) {
+            showDialog(
                 barrierDismissible: false,
                 context: context,
                 builder: (context) {
@@ -104,7 +104,7 @@ class _AccountPageState extends State<AccountPage> {
                       perform: () {},
                       buttonText: "Ok");
                 });
-         }
+          }
         }
       } catch (e) {
         String message =
@@ -112,9 +112,9 @@ class _AccountPageState extends State<AccountPage> {
         if (e is SocketException) {
           message = 'No Internet Connection. Please try again later.';
         }
-      
-        if(context.mounted){
-           showDialog(
+
+        if (context.mounted) {
+          showDialog(
             context: context,
             builder: (context) {
               return SampleDialog(
@@ -126,14 +126,13 @@ class _AccountPageState extends State<AccountPage> {
             },
           );
         }
-       }
       }
-    
+    }
   }
 
   void showQr() async {
-   if(context.mounted){
-     showDialog(
+    if (context.mounted) {
+      showDialog(
           context: context,
           builder: (context) {
             return Center(
@@ -146,7 +145,7 @@ class _AccountPageState extends State<AccountPage> {
               ),
             );
           });
-   }
+    }
 
     await Future.delayed(const Duration(seconds: 1)); // Small delay for UX
 
@@ -159,8 +158,8 @@ class _AccountPageState extends State<AccountPage> {
 
     Navigator.pop(context); // Close loading animation
 
-   if(context.mounted){
-     showDialog(
+    if (context.mounted) {
+      showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
@@ -217,12 +216,12 @@ class _AccountPageState extends State<AccountPage> {
           );
         },
       );
-   }
+    }
   }
 
   void rateUs() async {
-   if(context.mounted){
-     showDialog(
+    if (context.mounted) {
+      showDialog(
           barrierDismissible: false,
           context: context,
           builder: (context) {
@@ -236,14 +235,14 @@ class _AccountPageState extends State<AccountPage> {
               ),
             );
           });
-   }
+    }
     await LaunchReview.launch(androidAppId: "com.example.app", iOSAppId: "");
     Navigator.pop(context);
   }
 
   void signOut() {
-   if(context.mounted){
-     showDialog(
+    if (context.mounted) {
+      showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) {
@@ -402,17 +401,17 @@ class _AccountPageState extends State<AccountPage> {
           );
         },
       );
-   }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
       ),
-      backgroundColor: Colors.grey.shade100,
       body: SingleChildScrollView(
         child: Column(
           children: [

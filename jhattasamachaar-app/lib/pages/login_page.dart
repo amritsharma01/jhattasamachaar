@@ -219,11 +219,11 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration:  BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF0abcf9), // #00b4db
-              Color(0xFF2c69d1), // #0083b0
+              Colors.blue.shade100,
+              Colors.grey.shade200
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

@@ -33,28 +33,50 @@ class _HomePageState extends State<HomePage> {
         onTap: func,
         animationCurve: Curves.easeInOut,
         animationDuration: const Duration(milliseconds: 600),
-        backgroundColor: Colors.transparent, // Keep the background transparent
-        color: Colors.grey.shade300, // Light grey for a soft background
+        color: Theme.of(context).colorScheme.secondary,
+        backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor!,
         buttonBackgroundColor:
-            Colors.blue.shade600, // Slightly darker green for the active button
+           Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
         letIndexChange: (index) => true,
         items: [
           Icon(
             Icons.home,
-            size: 33,
+            size: i == 0
+                ? Theme.of(context).bottomNavigationBarTheme.selectedIconTheme!.size!
+                :  Theme.of(context)
+                    .bottomNavigationBarTheme
+                    .unselectedIconTheme!
+                    .size!,
             color: i == 0
-                ? Colors.white
-                : Colors.grey.shade700, // Active icon white, inactive grey
+                ? Theme.of(context).bottomNavigationBarTheme.selectedIconTheme!.color!
+                : Theme.of(context)
+                    .bottomNavigationBarTheme
+                  .unselectedIconTheme!.color!, // Active icon white, inactive grey
           ),
           Icon(
             Icons.person,
-            size: 33,
+              size: i == 1
+                ? Theme.of(context)
+                    .bottomNavigationBarTheme
+                    .selectedIconTheme!
+                    .size!
+                : Theme.of(context)
+                    .bottomNavigationBarTheme
+                    .unselectedIconTheme!
+                    .size!,
             color: i == 1
-                ? Colors.white
-                : Colors.grey.shade700, // Active icon white, inactive grey
+                   ? Theme.of(context)
+                    .bottomNavigationBarTheme
+                    .selectedIconTheme!
+                    .color!
+                : Theme.of(context)
+                    .bottomNavigationBarTheme
+                    .unselectedIconTheme!
+                    .color!, // Active icon white, inactive grey
           ),
         ],
       ),
+     
     );
   }
 }

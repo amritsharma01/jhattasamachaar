@@ -4,6 +4,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jhattasamachaar/firebase_options.dart';
 import 'package:jhattasamachaar/pages/home_page.dart';
 import 'package:jhattasamachaar/pages/login_page.dart';
+import 'package:jhattasamachaar/theme/theme_provider.dart';
+import 'package:provider/provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // compulsory for Firebase
   await Firebase.initializeApp(
@@ -12,7 +15,14 @@ void main() async {
   // Initialize secure storage
   const FlutterSecureStorage secureStorage = FlutterSecureStorage();
   String? token = await secureStorage.read(key: 'auth_token');
-  runApp(MyApp(token: token));
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) {
+        return ThemeProvider();
+      },
+      child: MyApp(token: token),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -21,8 +31,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: Provider.of<ThemeProvider>(context).themeData,
       debugShowCheckedModeBanner: false,
-      home: token != null ? HomePage() : const Login(),
+      home: token != null ? const HomePage() : const Login(),
     );
   }
 }
