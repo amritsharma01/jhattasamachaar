@@ -54,12 +54,15 @@ class _PreferenceState extends State<Preference> {
       showDialog(
           context: context,
           builder: (context) {
+            bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
             return Center(
               child: SizedBox(
                 width: 100,
                 height: 100,
                 child: Lottie.asset(
-                  'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+                  isDarkMode
+                      ? 'lib/assets/animations/loading_white.json'
+                      : 'lib/assets/animations/loading.json', // Update with your Lottie animation file path
                 ),
               ),
             );
@@ -132,12 +135,15 @@ class _PreferenceState extends State<Preference> {
       showDialog(
           context: context,
           builder: (context) {
+            bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
             return Center(
               child: SizedBox(
                 width: 100,
                 height: 100,
                 child: Lottie.asset(
-                  'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+                  isDarkMode
+                      ? 'lib/assets/animations/loading_white.json'
+                      : 'lib/assets/animations/loading.json', // Update with your Lottie animation file path
                 ),
               ),
             );
@@ -232,12 +238,15 @@ class _PreferenceState extends State<Preference> {
     showDialog(
       context: context,
       builder: (context) {
+        bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
         return Center(
           child: SizedBox(
             width: 100,
             height: 100,
             child: Lottie.asset(
-              'lib/assets/animations/loading.json',
+              isDarkMode
+                  ? "'lib/assets/animations/loading_white.json'"
+                  : 'lib/assets/animations/loading.json',
             ),
           ),
         );
@@ -259,7 +268,7 @@ class _PreferenceState extends State<Preference> {
 
       if (response.statusCode.toString().startsWith("2")) {
         Navigator.pop(context);
-         Navigator.pushAndRemoveUntil(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) {
             return const HomePage();
@@ -338,12 +347,15 @@ class _PreferenceState extends State<Preference> {
     showDialog(
       context: context,
       builder: (context) {
+        bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
         return Center(
           child: SizedBox(
             width: 100,
             height: 100,
             child: Lottie.asset(
-              'lib/assets/animations/loading.json',
+              isDarkMode
+                  ? "lib/assets/animations/loading_white.json"
+                  : 'lib/assets/animations/loading.json',
             ),
           ),
         );
@@ -416,14 +428,23 @@ class _PreferenceState extends State<Preference> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Theme.of(context).colorScheme.onPrimary,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           !widget.isUpdating
               ? GestureDetector(
                   onTap: () {
-                      Navigator.pushAndRemoveUntil(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) {
                         return const HomePage();
@@ -438,7 +459,9 @@ class _PreferenceState extends State<Preference> {
                     child: Container(
                       width: 70,
                       decoration: BoxDecoration(
-                          color: Colors.green.shade200,
+                          color: isDarkMode
+                              ? Colors.black54
+                              : Colors.green.shade200,
                           borderRadius: BorderRadius.circular(20)),
                       child: const Padding(
                         padding:
@@ -454,18 +477,17 @@ class _PreferenceState extends State<Preference> {
                 )
               : const SizedBox.shrink()
         ],
-        backgroundColor: Colors.white,
         automaticallyImplyLeading: widget.isUpdating,
       ),
       body: Column(
         children: [
           const SizedBox(height: 20),
-          const Text(
+          Text(
             "Select your preferred categories",
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -495,8 +517,11 @@ class _PreferenceState extends State<Preference> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       color: isSelected
-                          ? Colors.lightBlueAccent.withOpacity(0.3)
-                          : Colors.white,
+                          ? Theme.of(context).buttonTheme.colorScheme!.primary
+                          : Theme.of(context)
+                              .buttonTheme
+                              .colorScheme!
+                              .secondary,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -509,9 +534,9 @@ class _PreferenceState extends State<Preference> {
                           const SizedBox(height: 8),
                           Text(
                             category.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 16,
                             ),
                           ),
@@ -529,15 +554,9 @@ class _PreferenceState extends State<Preference> {
               padding: const EdgeInsets.symmetric(vertical: 25.0),
               child: Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.blue.shade300,
-                        Colors.blue.shade700,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )),
+                  borderRadius: BorderRadius.circular(30),
+                  color: Theme.of(context).buttonTheme.colorScheme!.primary,
+                ),
                 child: const Padding(
                   padding: EdgeInsets.all(15),
                   child: Text(

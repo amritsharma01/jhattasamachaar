@@ -23,6 +23,7 @@ class _LoginState extends State<Login> {
   bool isNew = true;
   Future<UserCredential?> signInWithGoogle() async {
     BuildContext? dialogContext;
+
     try {
       // Check if user is already signed in
       final currentUser = googleSignIn.currentUser;
@@ -38,11 +39,14 @@ class _LoginState extends State<Login> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext ctx) {
+          bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
           dialogContext = ctx;
           return Center(
             child: SizedBox(
               height: 100,
-              child: Lottie.asset("lib/assets/animations/loading.json"),
+              child: Lottie.asset(isDarkMode
+                  ? "lib/assets/animations/loading_white.json"
+                  : 'lib/assets/animations/loading.json'),
             ),
           );
         },
@@ -219,12 +223,9 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration:  BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Colors.blue.shade100,
-              Colors.grey.shade200
-            ],
+            colors: [Colors.blue.shade100, Colors.grey.shade200],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

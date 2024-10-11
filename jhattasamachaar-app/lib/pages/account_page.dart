@@ -135,12 +135,15 @@ class _AccountPageState extends State<AccountPage> {
       showDialog(
           context: context,
           builder: (context) {
+            bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
             return Center(
               child: SizedBox(
                 width: 100,
                 height: 100,
                 child: Lottie.asset(
-                  'lib/assets/animations/loading.json',
+                  isDarkMode
+                      ? 'lib/assets/animations/loading_white.json'
+                      : 'lib/assets/animations/loading_white.json',
                 ),
               ),
             );
@@ -188,6 +191,7 @@ class _AccountPageState extends State<AccountPage> {
                     padding: const EdgeInsets.symmetric(vertical: 25.0),
                     child: Container(
                       decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
                           color: Theme.of(context)
                               .buttonTheme
                               .colorScheme!
@@ -220,12 +224,15 @@ class _AccountPageState extends State<AccountPage> {
           barrierDismissible: false,
           context: context,
           builder: (context) {
+            bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
             return Center(
               child: SizedBox(
                 width: 100,
                 height: 100,
                 child: Lottie.asset(
-                  'lib/assets/animations/loading.json', // Update with your Lottie animation file path
+                  isDarkMode
+                      ? 'lib/assets/animations/loading_white.json'
+                      : 'lib/assets/animations/loading.json', // Update with your Lottie animation file path
                 ),
               ),
             );
@@ -267,8 +274,8 @@ class _AccountPageState extends State<AccountPage> {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).buttonTheme.colorScheme!.secondary,
-                       // Use a grey background to differentiate from "Yes"
+                  backgroundColor: Theme.of(context).colorScheme.onSecondary,
+                  // Use a grey background to differentiate from "Yes"
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -295,11 +302,14 @@ class _AccountPageState extends State<AccountPage> {
                     context: context,
                     barrierDismissible: false,
                     builder: (context) {
+                      bool isDarkMode =
+                          Theme.of(context).brightness == Brightness.dark;
                       return Center(
                         child: SizedBox(
                           height: 100,
-                          child: Lottie.asset(
-                              "lib/assets/animations/loading.json"),
+                          child: Lottie.asset(isDarkMode
+                              ? "lib/assets/animations/loading.json"
+                              : "lib/assets/animations/loading.json"),
                         ),
                       );
                     },
@@ -489,10 +499,16 @@ class _AccountPageState extends State<AccountPage> {
               name: "Rate Us",
               ontap: rateUs,
             ),
+            const SizedBox(
+              height: 10,
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                   height: 2, color: Theme.of(context).colorScheme.secondary),
+            ),
+            const SizedBox(
+              height: 10,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

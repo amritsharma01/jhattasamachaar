@@ -76,6 +76,7 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -84,7 +85,9 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade200, const Color(0xFF2c69d1)],
+            colors: isDarkMode
+                ? [Colors.black38, Colors.black12]
+                : [Colors.blue.shade200, const Color(0xFF2c69d1)],
             begin: Alignment.bottomRight,
             end: Alignment.topLeft,
           ),

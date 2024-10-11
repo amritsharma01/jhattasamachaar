@@ -39,21 +39,35 @@ class AboutUsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About Us'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Theme.of(context).colorScheme.onPrimary,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(
+          'About Us',
+          style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 20),
+        ),
         backgroundColor: Colors.transparent,
       ),
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: ListView.builder(
         itemCount: teamMembers.length,
         itemBuilder: (context, index) {
-          return _buildTeamCard(teamMembers[index]);
+          return _buildTeamCard(teamMembers[index], context);
         },
       ),
     );
   }
 
-  Widget _buildTeamCard(Map<String, String> member) {
+  Widget _buildTeamCard(Map<String, String> member, BuildContext context) {
     return Card(
+      color: Theme.of(context).cardColor,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       elevation: 5,
       shape: RoundedRectangleBorder(
@@ -78,7 +92,8 @@ class AboutUsPage extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               member['name']!,
-              style: const TextStyle(
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -87,9 +102,9 @@ class AboutUsPage extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               member['email']!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -97,11 +112,14 @@ class AboutUsPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildSocialIcon(SimpleIcons.facebook, member['facebook']!),
-                _buildSocialIcon(SimpleIcons.github, member['github']!),
-                _buildSocialIcon(SimpleIcons.linkedin, member['linkedin']!),
-                _buildSocialIcon(SimpleIcons.googleearth,
-                    member['website']!), // Added website icon
+                _buildSocialIcon(
+                    SimpleIcons.facebook, member['facebook']!, context),
+                _buildSocialIcon(
+                    SimpleIcons.github, member['github']!, context),
+                _buildSocialIcon(
+                    SimpleIcons.linkedin, member['linkedin']!, context),
+                _buildSocialIcon(SimpleIcons.googleearth, member['website']!,
+                    context), // Added website icon
               ],
             ),
           ],
@@ -110,10 +128,10 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialIcon(IconData iconData, String url) {
+  Widget _buildSocialIcon(IconData iconData, String url, BuildContext context) {
     return IconButton(
       icon: Icon(iconData),
-      color: Colors.black,
+      color: Theme.of(context).colorScheme.onPrimary,
       iconSize: 25,
       onPressed: () => _launchURL(url),
     );

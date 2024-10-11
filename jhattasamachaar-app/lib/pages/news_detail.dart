@@ -25,6 +25,13 @@ class NewsDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Theme.of(context).colorScheme.onPrimary,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -75,7 +82,7 @@ class NewsDetail extends StatelessWidget {
                       // Displaying the title
                       Text(
                         title,
-                        style:  TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.onPrimary,
@@ -85,7 +92,7 @@ class NewsDetail extends StatelessWidget {
                       // Displaying the published date
                       Text(
                         'Published on: $publishedAt',
-                        style:  TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontStyle: FontStyle.italic,
                           color: Theme.of(context).colorScheme.onSecondary,
@@ -107,7 +114,8 @@ class NewsDetail extends StatelessWidget {
                         child: Text(
                           description,
                           style: TextStyle(
-                              fontSize: 16, color: Theme.of(context).colorScheme.tertiary),
+                              fontSize: 16,
+                              color: Theme.of(context).colorScheme.tertiary),
                           textAlign: TextAlign.justify, // Justified alignment
                         ),
                       ),
@@ -123,14 +131,8 @@ class NewsDetail extends StatelessWidget {
                             child: Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(30),
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.blue.shade300,
-                                      Colors.blue.shade700,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  )),
+                                 color: Theme.of(context).buttonTheme.colorScheme!.primary
+                                 ),
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 30, vertical: 13),

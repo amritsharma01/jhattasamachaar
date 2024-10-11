@@ -3,7 +3,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:jhattasamachaar/components/everything_caught_up.dart';
 import 'package:jhattasamachaar/components/news_api.dart';
 import 'package:jhattasamachaar/components/audio_player_dialog.dart';
@@ -249,6 +248,7 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       floatingActionButton: isFabVisible
           ? Container(
@@ -276,8 +276,7 @@ class _NewsPageState extends State<NewsPage> {
                         width: 55,
                         height: 55,
                         child: Lottie.asset(
-                            "lib/assets/animations/loading_white.json"),
-                      )
+                            "lib/assets/animations/loading_white.json"))
                     : const Text(
                         "Bulletin",
                         style: TextStyle(fontSize: 17, color: Colors.white),
@@ -341,14 +340,16 @@ class _NewsPageState extends State<NewsPage> {
           ),
           RefreshIndicator(
             onRefresh: fetchNews,
-            color: Colors.blue,
-            backgroundColor: Colors.white,
+            color: isDarkMode ? Colors.white : Colors.blue,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
             strokeWidth: 3.0,
             displacement: 40,
             child: newsData == null
                 ? Center(
                     child: Lottie.asset(
-                      "lib/assets/animations/loading.json",
+                      isDarkMode
+                          ? "lib/assets/animations/loading_white.json"
+                          : "lib/assets/animations/loading.json",
                       width: 120,
                       height: 120,
                     ),
@@ -364,7 +365,9 @@ class _NewsPageState extends State<NewsPage> {
                                     const EdgeInsets.symmetric(vertical: 24.0),
                                 child: Center(
                                   child: Lottie.asset(
-                                    "lib/assets/animations/loading.json",
+                                    isDarkMode
+                                        ? "lib/assets/animations/loading_white.json"
+                                        : "lib/assets/animations/loading.json",
                                     width: 70,
                                     height: 70,
                                   ),
@@ -437,8 +440,10 @@ class _NewsPageState extends State<NewsPage> {
                                     children: [
                                       Text(
                                         title,
-                                        style:  TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary,
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),

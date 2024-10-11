@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 ThemeData lightMode = ThemeData(
   buttonTheme: ButtonThemeData(
-    colorScheme: ColorScheme.light(primary: Colors.blue.shade300,secondary: Colors.grey.shade400),
+    colorScheme: ColorScheme.light(primary: Colors.blue.shade300,secondary: Colors.white),
   ),
   dialogTheme: const DialogTheme(
       backgroundColor: Colors.white,
@@ -39,8 +39,9 @@ ThemeData lightMode = ThemeData(
 );
 
 ThemeData darkMode = ThemeData(
+  
   buttonTheme: ButtonThemeData(
-    colorScheme: ColorScheme.dark(primary: Colors.black87, secondary: Colors.grey.shade800),
+    colorScheme: ColorScheme.dark(primary: Colors.black54, secondary: Colors.grey.shade700),
   ),
   dialogTheme: DialogTheme(
       backgroundColor: Colors.grey.shade700,
