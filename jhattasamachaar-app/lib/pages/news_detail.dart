@@ -33,7 +33,7 @@ class NewsDetail extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
           child: Container(
             decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(20)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -75,20 +75,20 @@ class NewsDetail extends StatelessWidget {
                       // Displaying the title
                       Text(
                         title,
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
                       const SizedBox(height: 10),
                       // Displaying the published date
                       Text(
                         'Published on: $publishedAt',
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 14,
                           fontStyle: FontStyle.italic,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSecondary,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -106,8 +106,8 @@ class NewsDetail extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           description,
-                          style: const TextStyle(
-                              fontSize: 16, color: Colors.black54),
+                          style: TextStyle(
+                              fontSize: 16, color: Theme.of(context).colorScheme.tertiary),
                           textAlign: TextAlign.justify, // Justified alignment
                         ),
                       ),

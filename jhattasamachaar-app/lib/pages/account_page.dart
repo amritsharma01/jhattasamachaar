@@ -188,15 +188,10 @@ class _AccountPageState extends State<AccountPage> {
                     padding: const EdgeInsets.symmetric(vertical: 25.0),
                     child: Container(
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.blue.shade300,
-                              Colors.blue.shade700,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )),
+                          color: Theme.of(context)
+                              .buttonTheme
+                              .colorScheme!
+                              .primary),
                       child: const Padding(
                         padding:
                             EdgeInsets.symmetric(horizontal: 30, vertical: 10),
@@ -250,19 +245,19 @@ class _AccountPageState extends State<AccountPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            title: const Text(
+            title: Text(
               "Log Out",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: Colors.black87,
+                color: Theme.of(context).dialogTheme.titleTextStyle!.color,
               ),
             ),
-            content: const Text(
+            content: Text(
               "Are you sure you want to log out?",
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.black54,
+                color: Theme.of(context).dialogTheme.contentTextStyle!.color,
               ),
             ),
             actions: [
@@ -272,8 +267,8 @@ class _AccountPageState extends State<AccountPage> {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey
-                      .shade400, // Use a grey background to differentiate from "Yes"
+                  backgroundColor: Theme.of(context).buttonTheme.colorScheme!.secondary,
+                       // Use a grey background to differentiate from "Yes"
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -380,7 +375,8 @@ class _AccountPageState extends State<AccountPage> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade400,
+                  backgroundColor:
+                      Theme.of(context).buttonTheme.colorScheme!.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -442,7 +438,7 @@ class _AccountPageState extends State<AccountPage> {
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 20,
-                    color: Colors.grey[800],
+                    color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
                 const SizedBox(height: 1),
@@ -451,7 +447,7 @@ class _AccountPageState extends State<AccountPage> {
                   style: TextStyle(
                     fontWeight: FontWeight.w400,
                     fontSize: 14,
-                    color: Colors.grey[500],
+                    color: Theme.of(context).colorScheme.onSecondary,
                   ),
                 )
               ],
@@ -460,20 +456,19 @@ class _AccountPageState extends State<AccountPage> {
             // Divider
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(height: 2, color: Colors.grey.shade400),
+              child: Container(
+                  height: 2, color: Theme.of(context).colorScheme.secondary),
             ),
             const SizedBox(height: 20),
             // Settings Tiles
             SettingsTile(
               icon: Icons.qr_code_2_rounded,
               name: "QR",
-              color: Colors.white,
               ontap: showQr,
             ),
             SettingsTile(
               icon: Icons.monitor_heart,
               name: "Preferences",
-              color: Colors.white,
               ontap: () {
                 Navigator.push(context, MaterialPageRoute(builder: ((context) {
                   return const Preference(isUpdating: true);
@@ -483,7 +478,6 @@ class _AccountPageState extends State<AccountPage> {
             SettingsTile(
               icon: Icons.phone,
               name: "Contact Us",
-              color: Colors.white,
               ontap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
                   return AboutUsPage();
@@ -493,15 +487,60 @@ class _AccountPageState extends State<AccountPage> {
             SettingsTile(
               icon: Icons.star,
               name: "Rate Us",
-              color: Colors.white,
               ontap: rateUs,
             ),
-            SettingsTile(
-              icon: Icons.logout_sharp,
-              name: "Log Out",
-              color: Colors.blue.shade400,
-              ontap: signOut,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                  height: 2, color: Theme.of(context).colorScheme.secondary),
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: GestureDetector(
+                onTap: signOut,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).buttonTheme.colorScheme!.primary,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.logout,
+                          size: 28,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        const SizedBox(width: 15),
+                        Text(
+                          "Log Out",
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),

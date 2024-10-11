@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 class SettingsTile extends StatelessWidget {
   final icon;
   final String name;
-  final Color color;
+  
   final void Function()? ontap;
 
   const SettingsTile({
     super.key,
     required this.icon,
     required this.name,
-    required this.color,
+    
     required this.ontap,
   });
 
@@ -24,7 +24,7 @@ class SettingsTile extends StatelessWidget {
         onTap: ontap,
         child: Container(
           decoration: BoxDecoration(
-            color: color,
+            color: Theme.of(context).listTileTheme.tileColor,
             borderRadius: BorderRadius.circular(15),
             boxShadow: const [
               BoxShadow(
@@ -41,14 +41,14 @@ class SettingsTile extends StatelessWidget {
                 Icon(
                   icon,
                   size: 28,
-                  color: Colors.grey.shade700,
+                  color: Theme.of(context).listTileTheme.iconColor,
                 ),
                 const SizedBox(width: 15),
                 Text(
                   name,
                   style: TextStyle(
                     fontSize: 17,
-                    color: Colors.grey.shade900,
+                    color: Theme.of(context).listTileTheme.textColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -56,7 +56,7 @@ class SettingsTile extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
-                  color: Colors.grey.shade700,
+                  color: Theme.of(context).listTileTheme.iconColor,
                 ),
               ],
             ),

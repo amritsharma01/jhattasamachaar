@@ -7,22 +7,23 @@ class TokenNotFound extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog.adaptive(
+      backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      title: const Text(
+      title:  Text(
         'Error',
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 20,
-          color: Colors.black87,
+          color: Theme.of(context).dialogTheme.titleTextStyle!.color,
         ),
       ),
-      content: const Text(
+      content:  Text(
         'Token missing or expired, please login again',
         style: TextStyle(
           fontSize: 16,
-          color: Colors.black54,
+          color: Theme.of(context).dialogTheme.contentTextStyle!.color,
         ),
       ),
       actions: [
@@ -40,7 +41,7 @@ class TokenNotFound extends StatelessWidget {
             );
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue.shade400,
+            backgroundColor: Theme.of(context).buttonTheme.colorScheme!.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),

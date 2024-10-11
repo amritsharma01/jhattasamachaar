@@ -437,7 +437,8 @@ class _NewsPageState extends State<NewsPage> {
                                     children: [
                                       Text(
                                         title,
-                                        style: const TextStyle(
+                                        style:  TextStyle(
+                                          color: Theme.of(context).colorScheme.onPrimary,
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
