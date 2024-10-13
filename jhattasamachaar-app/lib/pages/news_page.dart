@@ -313,14 +313,7 @@ class _NewsPageState extends State<NewsPage> {
           ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-              onPressed: () {
-                Provider.of<ThemeProvider>(context, listen: false)
-                    .toggleTheme();
-              },
-              icon: const Icon(Icons.dark_mode_rounded))
-        ],
+       
       ),
       body: Stack(
         children: [

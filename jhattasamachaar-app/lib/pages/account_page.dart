@@ -14,8 +14,11 @@ import 'package:jhattasamachaar/globals/api_link.dart';
 import 'package:jhattasamachaar/pages/about_us_page.dart';
 import 'package:jhattasamachaar/pages/login_page.dart';
 import 'package:jhattasamachaar/pages/preference_page.dart';
+import 'package:jhattasamachaar/theme/theme.dart';
+import 'package:jhattasamachaar/theme/theme_provider.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // QR code generation package
 
 class AccountPage extends StatefulWidget {
@@ -143,7 +146,7 @@ class _AccountPageState extends State<AccountPage> {
                 child: Lottie.asset(
                   isDarkMode
                       ? 'lib/assets/animations/loading_white.json'
-                      : 'lib/assets/animations/loading_white.json',
+                      : 'lib/assets/animations/loading.json',
                 ),
               ),
             );
@@ -176,6 +179,7 @@ class _AccountPageState extends State<AccountPage> {
               width: 250,
               height: 250,
               child: QrImageView(
+                backgroundColor: Colors.white30,
                 data: jsonEncode(qrData),
                 version: QrVersions.auto,
                 size: 200.0,
@@ -308,7 +312,7 @@ class _AccountPageState extends State<AccountPage> {
                         child: SizedBox(
                           height: 100,
                           child: Lottie.asset(isDarkMode
-                              ? "lib/assets/animations/loading.json"
+                              ? "lib/assets/animations/loading_white.json"
                               : "lib/assets/animations/loading.json"),
                         ),
                       );
@@ -417,6 +421,65 @@ class _AccountPageState extends State<AccountPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: Consumer<ThemeProvider>(
+              builder: (context, themeProvider, _) {
+                return GestureDetector(
+                  onTap: () {
+                    themeProvider.toggleTheme();
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: 80,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: themeProvider.themeData == lightMode
+                            ? Colors.white
+                            : Colors.black,
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black38,
+                            blurRadius: 2,
+                            offset: Offset(0, 3),
+                          ),
+                        ]),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 7),
+                      child: Row(
+                        mainAxisAlignment: themeProvider.themeData == lightMode
+                            ? MainAxisAlignment.start
+                            : MainAxisAlignment.end,
+                        children: [
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 600),
+                            transitionBuilder: (child, animation) {
+                              return ScaleTransition(
+                                  scale: animation, child: child);
+                            },
+                            child: themeProvider.themeData == lightMode
+                                ? Icon(
+                                    Icons.wb_sunny,
+                                    color: Colors.yellow.shade800,
+                                    key: const ValueKey("light"),
+                                  )
+                                : Icon(
+                                    Icons.nights_stay,
+                                    color: Colors.blue.shade300,
+                                    key: const ValueKey("dark"),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:jhattasamachaar/firebase_options.dart';
+import 'package:jhattasamachaar/theme/firebase_options.dart';
 import 'package:jhattasamachaar/pages/home_page.dart';
 import 'package:jhattasamachaar/pages/login_page.dart';
 import 'package:jhattasamachaar/theme/theme_provider.dart';
