@@ -94,7 +94,7 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(5.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -107,27 +107,21 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                           .resetPlayer(); // Reset player when close button is pressed
                       Navigator.pop(context);
                     },
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 25,
+                    ),
                   ),
                 ],
               ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Image.asset(
-                  "lib/assets/images/news.jpg",
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(height: 20),
               SliderTheme(
                 data: SliderThemeData(
-                  trackHeight: 3,
+                  trackHeight: 5,
                   thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 12),
+                      const RoundSliderThumbShape(enabledThumbRadius: 15),
                   activeTrackColor: Colors.white,
-                  inactiveTrackColor: Colors.grey[300],
+                  inactiveTrackColor: Colors.grey[400],
                   thumbColor: Colors.white,
                   overlayColor: Colors.blueAccent.withOpacity(0.3),
                 ),
@@ -160,7 +154,7 @@ class _AudioPlayerDialogState extends State<AudioPlayerDialog> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [

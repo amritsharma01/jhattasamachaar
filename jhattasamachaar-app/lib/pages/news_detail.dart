@@ -37,7 +37,7 @@ class NewsDetail extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: Container(
             decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
@@ -127,12 +127,14 @@ class NewsDetail extends StatelessWidget {
                         },
                         child: Center(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 25.0),
+                            padding: const EdgeInsets.symmetric(vertical: 10.0),
                             child: Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(30),
-                                 color: Theme.of(context).buttonTheme.colorScheme!.primary
-                                 ),
+                                  color: Theme.of(context)
+                                      .buttonTheme
+                                      .colorScheme!
+                                      .primary),
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 30, vertical: 13),

@@ -169,6 +169,7 @@ class _AccountPageState extends State<AccountPage> {
         barrierDismissible: false,
         context: context,
         builder: (context) {
+          bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
           return AlertDialog(
             title: const Center(
                 child: Text(
@@ -176,13 +177,18 @@ class _AccountPageState extends State<AccountPage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             )),
             content: SizedBox(
-              width: 250,
-              height: 250,
+              width: 220,
+              height: 220,
               child: QrImageView(
-                backgroundColor: Colors.white30,
+                dataModuleStyle: QrDataModuleStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                    dataModuleShape: QrDataModuleShape.circle),
+                eyeStyle: QrEyeStyle(
+                    eyeShape: QrEyeShape.circle,
+                    color: isDarkMode ? Colors.white : Colors.black),
                 data: jsonEncode(qrData),
                 version: QrVersions.auto,
-                size: 200.0,
+                size: 210.0,
               ),
             ),
             actions: [
@@ -191,25 +197,20 @@ class _AccountPageState extends State<AccountPage> {
                   Navigator.pop(context);
                 },
                 child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 25.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Theme.of(context)
-                              .buttonTheme
-                              .colorScheme!
-                              .primary),
-                      child: const Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                        child: Text(
-                          "Close",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold),
-                        ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        color:
+                            Theme.of(context).buttonTheme.colorScheme!.primary),
+                    child: const Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                      child: Text(
+                        "Close",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -435,17 +436,14 @@ class _AccountPageState extends State<AccountPage> {
                     width: 80,
                     height: 40,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: themeProvider.themeData == lightMode
-                            ? Colors.white
-                            : Colors.black,
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black38,
-                            blurRadius: 2,
-                            offset: Offset(0, 3),
-                          ),
-                        ]),
+                      border: Border.all(
+                          color: Theme.of(context).colorScheme.onSecondary,
+                          width: 1),
+                      borderRadius: BorderRadius.circular(20),
+                      color: themeProvider.themeData == lightMode
+                          ? Colors.white
+                          : Colors.black54,
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 7),
                       child: Row(
@@ -462,12 +460,12 @@ class _AccountPageState extends State<AccountPage> {
                             child: themeProvider.themeData == lightMode
                                 ? Icon(
                                     Icons.wb_sunny,
-                                    color: Colors.yellow.shade800,
+                                    color: Colors.yellow.shade900,
                                     key: const ValueKey("light"),
                                   )
                                 : Icon(
                                     Icons.nights_stay,
-                                    color: Colors.blue.shade300,
+                                    color: Colors.blue.shade400,
                                     key: const ValueKey("dark"),
                                   ),
                           ),
@@ -532,7 +530,7 @@ class _AccountPageState extends State<AccountPage> {
               child: Container(
                   height: 2, color: Theme.of(context).colorScheme.secondary),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
             // Settings Tiles
             SettingsTile(
               icon: Icons.qr_code_2_rounded,
@@ -570,21 +568,22 @@ class _AccountPageState extends State<AccountPage> {
               child: Container(
                   height: 2, color: Theme.of(context).colorScheme.secondary),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: GestureDetector(
                 onTap: signOut,
                 child: Container(
                   decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                        width: 1),
                     color: Theme.of(context).buttonTheme.colorScheme!.primary,
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
-                        blurRadius: 5,
+                        blurRadius: 2,
                         offset: Offset(0, 3),
                       ),
                     ],

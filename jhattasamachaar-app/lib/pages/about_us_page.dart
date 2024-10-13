@@ -28,9 +28,9 @@ class AboutUsPage extends StatelessWidget {
       'name': 'Kripesh Nihure',
       'email': 'kripeshnihure@gmail.com', // Updated email
       'image': 'lib/assets/images/kripesh.jpg',
-      'facebook': 'https://facebook.com/kripeshnihure',
-      'github': 'https://github.com/kripeshnihure',
-      'linkedin': 'https://linkedin.com/in/kripeshnihure',
+      'facebook': 'https://www.facebook.com/kripesh.nihure.1',
+      'github': 'https://github.com/WT-Kripesh',
+      'linkedin': 'https://www.linkedin.com/in/kripesh-nihure77/',
       'website': 'https://www.kripeshnihure.com.np', // Added website
     },
   ];
@@ -68,7 +68,7 @@ class AboutUsPage extends StatelessWidget {
   Widget _buildTeamCard(Map<String, String> member, BuildContext context) {
     return Card(
       color: Theme.of(context).cardColor,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),

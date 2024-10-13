@@ -313,7 +313,6 @@ class _NewsPageState extends State<NewsPage> {
           ),
         ),
         centerTitle: true,
-       
       ),
       body: Stack(
         children: [
@@ -395,7 +394,7 @@ class _NewsPageState extends State<NewsPage> {
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 6.0),
+                              horizontal: 10.0, vertical: 3),
                           child: Card(
                             color: Theme.of(context).cardColor,
                             elevation: 3,

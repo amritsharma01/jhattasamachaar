@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 class SettingsTile extends StatelessWidget {
   final icon;
   final String name;
-  
+
   final void Function()? ontap;
 
   const SettingsTile({
     super.key,
     required this.icon,
     required this.name,
-    
     required this.ontap,
   });
 

@@ -2,6 +2,7 @@
 import 'dart:convert'; // For jsonEncode
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -225,9 +226,12 @@ class _LoginState extends State<Login> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade100, Colors.grey.shade200],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [
+              Colors.grey.shade900,
+              Colors.black87,
+            ],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
           ),
         ),
         child: Center(
@@ -236,72 +240,64 @@ class _LoginState extends State<Login> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Logo and Text Section
-                const SizedBox(height: 80), // Space at the top
+                const SizedBox(height: 50), // Space at the top
                 SizedBox(
-                  height: 150, // Logo height
+                  height: 210,
+                  width: 210, // Logo height
                   child: Center(
                     child: Image.asset("lib/assets/logo/logo.png"),
                   ),
                 ),
-                const SizedBox(height: 30),
-                const Text(
-                  "Hello",
-                  style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10.0,
-                        color: Colors.black38,
-                        offset: Offset(3.0, 3.0),
-                      ),
-                    ],
-                  ),
-                ),
+
                 const SizedBox(height: 8),
-                const Text(
-                  "Get the Latest News Summaries",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "Get the Latest Personalized News Summaries",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white70,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),
 
                 // Custom Divider with soft edges
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Container(
-                    height: 2,
-                    decoration: BoxDecoration(
-                      color: Colors.white70,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 3,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 150), // Pushes the button lower
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 40),
+                //   child: Container(
+                //     height: 2,
+                //     decoration: BoxDecoration(
+                //       color: Colors.white70,
+                //       borderRadius: BorderRadius.circular(10),
+                //       boxShadow: const [
+                //         BoxShadow(
+                //           color: Colors.black26,
+                //           blurRadius: 3,
+                //           offset: Offset(0, 3),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                const SizedBox(height: 200), // Pushes the button lower
 
                 // Sign-in Button Section
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 7),
                   child: GestureDetector(
                     onTap: signInWithGoogle,
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 14),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.white24),
                         borderRadius: BorderRadius.circular(30),
-                        color: Colors.white,
+                        color: Colors.blue.shade100,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.15),

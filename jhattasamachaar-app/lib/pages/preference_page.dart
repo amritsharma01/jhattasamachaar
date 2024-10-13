@@ -245,7 +245,7 @@ class _PreferenceState extends State<Preference> {
             height: 100,
             child: Lottie.asset(
               isDarkMode
-                  ? "'lib/assets/animations/loading_white.json'"
+                  ? "lib/assets/animations/loading_white.json'"
                   : 'lib/assets/animations/loading.json',
             ),
           ),
@@ -428,18 +428,10 @@ class _PreferenceState extends State<Preference> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).colorScheme.onPrimary,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
         actions: [
           !widget.isUpdating
               ? GestureDetector(
@@ -458,18 +450,21 @@ class _PreferenceState extends State<Preference> {
                     padding: const EdgeInsets.only(right: 20),
                     child: Container(
                       width: 70,
+                      height: 40,
                       decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? Colors.black54
-                              : Colors.green.shade200,
+                          color: Theme.of(context)
+                              .buttonTheme
+                              .colorScheme!
+                              .primary,
                           borderRadius: BorderRadius.circular(20)),
-                      child: const Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      child: Center(
                         child: Text(
                           "Skip",
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.black),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
                     ),
@@ -477,21 +472,23 @@ class _PreferenceState extends State<Preference> {
                 )
               : const SizedBox.shrink()
         ],
-        automaticallyImplyLeading: widget.isUpdating,
+        automaticallyImplyLeading: widget.isUpdating ? true : false,
       ),
       body: Column(
         children: [
-          const SizedBox(height: 20),
-          Text(
-            "Select your preferred categories",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onPrimary,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            child: Text(
+              "Select your preferred categories",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -551,19 +548,19 @@ class _PreferenceState extends State<Preference> {
           GestureDetector(
             onTap: widget.isUpdating ? updatePreferences : addPreferences,
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 25.0),
+              padding: const EdgeInsets.symmetric(vertical: 15.0),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   color: Theme.of(context).buttonTheme.colorScheme!.primary,
                 ),
                 child: const Padding(
-                  padding: EdgeInsets.all(15),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   child: Text(
                     "Submit Preferences",
                     style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold),
                   ),
                 ),
