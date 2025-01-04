@@ -222,13 +222,14 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.grey.shade900,
-              Colors.black87,
+              isDarkMode ? Colors.grey.shade900 : Colors.grey.shade200,
+              isDarkMode ? Colors.black87 : Colors.blue.shade100,
             ],
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
@@ -250,15 +251,15 @@ class _LoginState extends State<Login> {
                 ),
 
                 const SizedBox(height: 8),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     "Get the Latest Personalized News Summaries",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white70,
+                      color: isDarkMode ? Colors.white70 : Colors.grey.shade800,
                     ),
                   ),
                 ),
@@ -297,7 +298,7 @@ class _LoginState extends State<Login> {
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.white24),
                         borderRadius: BorderRadius.circular(30),
-                        color: Colors.blue.shade100,
+                        color: isDarkMode ? Colors.blue.shade100 : Colors.white,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.15),
@@ -321,7 +322,7 @@ class _LoginState extends State<Login> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
-                              color: Colors.black,
+                              color: Colors.black87,
                             ),
                           ),
                         ],

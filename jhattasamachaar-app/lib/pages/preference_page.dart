@@ -524,7 +524,9 @@ class _PreferenceState extends State<Preference> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Image.asset(
-                            "lib/assets/images/${category.name.toLowerCase()}.png",
+                            category.name.toLowerCase() == "photo feature"
+                                ? "lib/assets/images/photo_feature.png"
+                                : "lib/assets/images/${category.name.toLowerCase()}.png",
                             height: 60,
                             fit: BoxFit.cover,
                           ),
