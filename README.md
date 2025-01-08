@@ -1,15 +1,32 @@
 # JhattaSamachaar
 
+JhattaSamachaar is a news aggregation and audio playback app that lets users access the latest news in audio format, tailored to their preferences. This project uses Flutter for the frontend.
 
-## Getting Started
+## Features
+- **News Aggregation:** Fetch and display news articles from a backend API.
+- **Audio Playback:** Download and play audio versions of news articles with controls for play, pause, seek, rewind, and forward.
+- **User Preferences:** Set and update preferences for liked and disliked categories.
+- **Secure Authentication:** Integrates with Google Sign-In and secure token management.
+- **Theming:** Supports light and dark themes with a customizable toggle.
 
-This project is a starting point for a Flutter application.
+## Prerequisites
+Ensure you have the following installed:
 
-A few resources to get you started if this is your first Flutter project:
+- **Frontend:** Flutter (Stable Channel, version 3.10+).
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Setup
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/amritsharma01/jhattaamachaar
+   cd jhattaamachaar-app
+
+2. Install Flutter Dependencies:
+    ```bash
+    flutter pub get
+
+3. Run the app:
+    ```bash
+    flutter run
+
+And All Set. Enjoy!
